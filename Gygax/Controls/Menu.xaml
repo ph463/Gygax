@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="GygaxVisu.Controls.Menu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GygaxVisu.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+
+        <Menu IsMainMenu="True">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Image" Click="NewImage_OnClick" />
+                <MenuItem Header="_Video from Folder" Click="VideoFromFile_OnClick" />
+                <MenuItem Header="_Video" Click="MenuItem_OnClick" />
+                <MenuItem Header="_Local Camera" Name="LocalCamera" Initialized="FrameworkElement_OnInitialized" IsEnabled="False"/>
+                <Separator/>
+                <MenuItem Header="_Pointcloud" Click="PointCloud_OnClick"/>
+                <MenuItem Header="_Potree" Click="Potree_OnClick"/>
+                <MenuItem Header="_3D device" IsEnabled="False"/>
+                <Separator/>
+                <MenuItem Header="_IFC file" Click="OpenIfcFile_OnClick"/>
+                <Separator/>
+                <MenuItem Header="_Visual SFM reconstruction" Click="Vsfm_OnClick"/>
+                <MenuItem Header="_Scene Scanner Positions" Click="Scene_OnClick"/>
+                <Separator/>
+                <MenuItem Header="_Exit" Click="MenuItemExit_OnClick"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem IsCheckable="True" Header="_Show common 3D space" IsChecked="{Binding ShowCommon3DSpace, Mode=TwoWay}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Process">
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="Supported libraries"/>
+                <Separator/>
+                <MenuItem Header="_About Gygax"/>
+            </MenuItem>
+        </Menu>
+
+
+    </Grid>
+</UserControl>

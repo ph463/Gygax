@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GygaxCore.Interfaces
+{
+    public interface IProcessor : IStreamable
+    {
+        IStreamable Source { get; set; }
+
+        void SourceUpdated(object sender, EventArgs e);
+
+        void Initial();
+
+        void Update();
+    }
+}

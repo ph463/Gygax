@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+project(PclWrapper)
+
+find_package(PCL 1.7.2 REQUIRED)
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+add_library (PclWrapper SHARED PclWrapper.cpp PclWrapper.h)
+target_link_libraries (PclWrapper ${PCL_LIBRARIES})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES VS_DOTNET_REFERENCES "System;System.Core;System.Data;System.Drawing;System.Xml;WindowsBase")
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/clr /EHa")
+set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
+
+if(CMAKE_CXX_FLAGS_DEBUG MATCHES "/RTC1")
+   string(REPLACE "/RTC1" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+endif()
+
+if(CMAKE_CXX_FLAGS MATCHES "/EHsc")
+   string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
