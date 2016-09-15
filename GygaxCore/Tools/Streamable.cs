@@ -1,15 +1,20 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 using GygaxCore.Interfaces;
 using IImage = Emgu.CV.IImage;
+using Size = System.Drawing.Size;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
-    public abstract class Streamable : IStreamable
+    public class Streamable : IStreamable
     {
         public event PropertyChangedEventHandler PropertyChanged;
         
@@ -68,14 +73,24 @@ namespace GygaxCore
         [DllImport("gdi32")]
         private static extern int DeleteObject(IntPtr o);
 
+        public double ImageScale { get; private set; }
+
         /// <summary>
         /// Convert an IImage to a WPF BitmapSource. The result can be used in the Set Property of Image.ImageSource
         /// </summary>
         /// <param name="image">The Emgu CV Image</param>
         /// <returns>The equivalent BitmapSource</returns>
-        public static BitmapSource ToBitmapSource(IImage image)
+        public BitmapSource ToBitmapSource(IImage image)
         {
-            using (System.Drawing.Bitmap source = image.Bitmap)
+            ImageScale = 1000.0/image.Bitmap.Width;
+
+            var size = new Size((int)Math.Ceiling(image.Bitmap.Width * ImageScale), (int)Math.Ceiling(image.Bitmap.Height * ImageScale));
+
+            Image<Bgr, Byte> dst = new Image<Bgr, byte>(size);
+
+            CvInvoke.Resize(image,dst,size, ImageScale, ImageScale, Inter.Linear);
+            
+            using (System.Drawing.Bitmap source = dst.Bitmap)
             {
                 IntPtr ptr = source.GetHbitmap(); //obtain the Hbitmap
 
@@ -93,6 +108,8 @@ namespace GygaxCore
             }
         }
 
-        public abstract void Close();
+        public virtual void Close()
+        {
+        }
     }
 }

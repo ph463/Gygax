@@ -7,7 +7,14 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              >
-    <Grid>
-        <Image Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform"/>
-    </Grid>
+    <StackPanel>
+        <Image Name="Image" Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform" MouseDown="UIElement_OnMouseDown">
+            <Image.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Processor" Name="ProcessorContextMenu"/>
+                </ContextMenu>
+            </Image.ContextMenu>
+        </Image>
+        <Label Content="{Binding Path=Filename, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"></Label>
+    </StackPanel>
 </UserControl>

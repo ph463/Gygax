@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Media.Media3D;
 using SharpDX;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
-    public class SceneScannerPositionReader : Streamable
+    public class SceneScannerPositionLoader : Streamable
     {
-        public SceneScannerPositionReader(string file)
+        public SceneScannerPositionLoader(string file)
         {
             Data = ReadScannerPositions(file);
         }
@@ -38,18 +39,18 @@ namespace GygaxCore
                     var cp = new CameraPosition
                     {
                         Type = CameraPosition.CameraType.Spherical,
-                        CameraCenter = new Vector3(float.Parse(vals[1]), float.Parse(vals[3]), -float.Parse(vals[2])),
+                        CameraCenter = new Vector3D(double.Parse(vals[1]), double.Parse(vals[3]), -double.Parse(vals[2])),
                         Name = vals[0].Trim('"'),
                         OpeningAngleVerticalTo = -Math.PI/2.0 * 2.0/3.0
                     };
-                    
-                    cp.Orientation = Quaternion.RotationAxis(
-                        new Vector3(
-                            float.Parse(vals[4]),
-                            float.Parse(vals[6]),
-                            -float.Parse(vals[5])),
-                        (float)((float.Parse(vals[7])) * Math.PI / 180.0));
-                    
+
+                    cp.Orientation = CameraPosition.RotationAxis(
+                        new Vector3D(
+                            double.Parse(vals[4]),
+                            double.Parse(vals[6]),
+                            -double.Parse(vals[5])),
+                        ((double.Parse(vals[7]))*Math.PI/180.0));
+
                     retList.Add(cp);
 
                     line = reader.ReadLine();

@@ -5,13 +5,13 @@ using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using PclWrapper;
 
-namespace GygaxCore.DataStructures
+namespace GygaxCore.DataStructures.DataStructures.DataStructures
 {
     /// <summary>
     /// https://github.com/potree/potree/blob/master/docs/file_format.md
     /// </summary>
 
-    public class Potree
+    public class PotreeNode
     {
         public class TreeSettings
         {
@@ -45,13 +45,13 @@ namespace GygaxCore.DataStructures
 
         public int NodePointNumber;
         public int Level;
-        public Potree[] Children = new Potree[8];
+        public PotreeNode[] Children = new PotreeNode[8];
         public byte Mask;
         public string Filename;
 
-        private Potree _next;
+        private PotreeNode _next;
 
-        public Potree(Uri location)
+        public PotreeNode(Uri location)
         {
             ReadSettings(location);
             Compilation = new TreeCompilation();
@@ -61,7 +61,7 @@ namespace GygaxCore.DataStructures
             UpdateCompilation();
         }
 
-        private Potree(){}
+        private PotreeNode(){}
         
         private void ReadSettings(Uri location)
         {
@@ -127,7 +127,7 @@ namespace GygaxCore.DataStructures
             }
 
             //Now to a breadth-first search to assemble the tree
-            Queue<Potree> nodeQueue = new Queue<Potree>();
+            Queue<PotreeNode> nodeQueue = new Queue<PotreeNode>();
 
             nodeQueue.Enqueue(this);
 
@@ -148,7 +148,7 @@ namespace GygaxCore.DataStructures
                 {
                     if ((node.Mask >> i & 0x01) == 1)
                     {
-                        var n = new Potree()
+                        var n = new PotreeNode()
                         {
                             Level = node.Level + 1,
                             Settings = node.Settings,

@@ -10,7 +10,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using SharpDX;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
     public static class LUT
     {

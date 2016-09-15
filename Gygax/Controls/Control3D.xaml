@@ -7,11 +7,12 @@
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
-             xmlns:gygaxCore="clr-namespace:GygaxCore;assembly=GygaxCore"
+             xmlns:gygaxCore="clr-namespace:GygaxCore.DataStructures;assembly=GygaxCore"
+             xmlns:helpers="clr-namespace:GygaxVisu.Helpers"
              mc:Ignorable="d"
              >
     <Grid>
-        <Button HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="LoadingAnimation"/>
+        <Label Content="loading..." HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="LoadingAnimation"></Label>
         <hx:Viewport3DX
             x:Name="Viewport"
             TextBrush="Black"
@@ -19,9 +20,19 @@
             CoordinateSystemLabelForeground="White"
             UseDefaultGestures="True"
             Visibility="Hidden"
+            MouseDown="Viewport_OnMouseDown"
+            ShowViewCube="False"
             >
-            
-            <hx:AmbientLight3D Color="1.0,1.0,1.0,1.0"/>
         </hx:Viewport3DX>
+        <!--
+        <Label>
+            <Label.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="Close">
+                    </MenuItem>
+                 </ContextMenu>
+            </Label.ContextMenu>
+        </Label>
+        -->
     </Grid>
 </UserControl>

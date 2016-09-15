@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HelixToolkit.Wpf.SharpDX;
+using SharpDX;
 
 namespace GygaxVisu
 {
@@ -12,6 +13,6 @@ namespace GygaxVisu
         public string IfcName;
         public int TextureWidth;
         public int TextureHeight;
-        //public UvMapper mapper;
+        public UvMapper Mapper;
     }
 }

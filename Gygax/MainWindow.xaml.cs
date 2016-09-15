@@ -4,28 +4,12 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GygaxCore;
-using System.Windows.Forms;
-using GygaxVisu.Controls;
-using GygaxVisu.Visualizer;
-using GygaxCore.Devices;
 using GygaxCore.Interfaces;
-using HelixToolkit.Wpf.SharpDX;
-using SharpDX;
-using SharpDX.Direct3D11;
-using Image = GygaxCore.Image;
-using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace GygaxVisu
 {
@@ -45,9 +29,55 @@ namespace GygaxVisu
 
             _viewModel.PropertyChanged += ViewModelOnPropertyChanged;
 
+            _viewModel.PropertyChanged += SelectedItemStage.UpdateStageSource;
+
             StreamList.SelectionChanged += StreamListOnSelectionChanged;
 
             //_viewModel.Items.CollectionChanged += Stage.Items_CollectionChanged;
+
+            _viewModel.PropertyChanged += ShowConsole;
+            
+
+            _viewModel.ClearWorkspace += SelectedItemStage.ViewModelOnClearWorkspace;
+            _viewModel.ClearWorkspace += CommonStage.ViewModelOnClearWorkspace;
+            _viewModel.ClearWorkspace += ViewModelOnClearWorkspace;
+
+
+        }
+
+        private void ViewModelOnClearWorkspace(object sender, EventArgs eventArgs)
+        {
+            _viewModel.ShowCommon3DSpace = false;
+
+
+            foreach (var s in StreamList.Items)
+            {
+
+            }
+        }
+
+
+        [DllImport("Kernel32")]
+        public static extern void AllocConsole();
+
+        [DllImport("Kernel32")]
+        public static extern void FreeConsole();
+
+        private void ShowConsole(object sender, PropertyChangedEventArgs e)
+        {
+            if (!e.PropertyName.Equals("ShowConsole"))
+                return;
+
+            //Open Console
+            if (((ViewModel) sender).ShowConsole)
+            {
+                AllocConsole();
+                //Console.WriteLine("test");
+            }
+            else
+            {
+                FreeConsole();
+            }
         }
 
         private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -72,8 +102,12 @@ namespace GygaxVisu
         {
             //Stage.MainGrid.Children.Add(((System.Windows.Controls.ListBox)sender).SelectedItems[0]);
 
-            if(((System.Windows.Controls.ListBox)sender).SelectedItems.Count > 0)
+            if (((System.Windows.Controls.ListBox) sender).SelectedItems.Count > 0
+                && _viewModel.ShowSelectedInMainStage
+                )
+            {
                 SelectedItemStage.MainGrid.DataContext = ((System.Windows.Controls.ListBox) sender).SelectedItems[0];
+            }
 
         }
 

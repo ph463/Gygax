@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Philipp/Dropbox/CIT/Gygax/PclWrapper/PclWrapper
+# Install script for directory: C:/Users/Philipp/Documents/Visual Studio 2015/Projects/Gygax/PclWrapper/PclWrapper
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -35,5 +35,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Philipp/Documents/GitHub/Gygax/PclWrapper/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Philipp/Documents/Visual Studio 2015/Projects/Gygax/PclWrapper/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

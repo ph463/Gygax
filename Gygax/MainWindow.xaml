@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GygaxVisu"
         xmlns:controls="clr-namespace:GygaxVisu.Controls"
-        xmlns:gygaxCore="clr-namespace:GygaxCore;assembly=GygaxCore"
+        xmlns:gygaxCore="clr-namespace:GygaxCore.DataStructures;assembly=GygaxCore"
         xmlns:devices="clr-namespace:GygaxCore.Devices;assembly=GygaxCore"
         xmlns:self="clr-namespace:GygaxCore.Ifc;assembly=GygaxCore"
         xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"

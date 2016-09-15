@@ -14,6 +14,7 @@
             CoordinateSystemLabelForeground="White"
             UseDefaultGestures="True"
             EnableCurrentPosition="True"
+            MouseDown="Viewport_OnMouseDown"
             >
         </hx:Viewport3DX>
     </Grid>

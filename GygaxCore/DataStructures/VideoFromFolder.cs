@@ -8,11 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using IImage = GygaxCore.Interfaces.IImage;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
-    public class VideoFromFolder : Streamable, IImage
+    public class VideoFromFolder : Streamable, Interfaces.IImage
     {
         private bool _stop;
 

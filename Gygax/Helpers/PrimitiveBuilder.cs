@@ -74,10 +74,11 @@ namespace GygaxVisu
             normals.Add(new Vector3(1, 0, 0));
             normals.Add(new Vector3(1, 0, 0));
 
-            textureCoordinates.Add(new Vector2(1, 1));
-            textureCoordinates.Add(new Vector2(0, 1));
+
             textureCoordinates.Add(new Vector2(0, 0));
             textureCoordinates.Add(new Vector2(1, 0));
+            textureCoordinates.Add(new Vector2(1, 1));
+            textureCoordinates.Add(new Vector2(0, 1));
 
             triangleIndices.Add(2);
             triangleIndices.Add(1);

@@ -6,6 +6,8 @@
 #include <iostream>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_representation.h>
+#include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
 
 using namespace System;
 
@@ -37,6 +39,10 @@ namespace PclWrapper {
 		array<Points>^ Process1(array<Points>^ cloud);
 		array<Points>^ Process2(array<Points>^ cloud);
 		array<Points>^ Process3(array<Points>^ cloud);
+
+		//array<Points>^ Process4(array<Points>^ cloud1, array<Points>^ cloud2);
+		void Process4(array<Points>^ cloud1, array<Points>^ cloud2, array<float>^ transformation);
+
 
 	private:
 		array<Points>^ convertPointcloudToPoints(pcl::PointCloud<pcl::PointXYZRGB>::Ptr p);

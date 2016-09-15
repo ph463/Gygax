@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,19 +10,19 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GygaxCore;
+using System.Windows.Media.Media3D;
 using GygaxCore.DataStructures;
 using GygaxCore.Devices;
 using GygaxCore.Ifc;
-using Image = GygaxCore.Image;
+using GygaxVisu.Helpers;
+using GygaxVisu.Method;
+using Image = GygaxCore.DataStructures.Image;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
 using GygaxVisu.Visualizer;
+using HelixToolkit.Wpf.SharpDX;
+using PclWrapper;
+using SharpDX;
 
 namespace GygaxVisu.Controls
 {
@@ -34,7 +36,6 @@ namespace GygaxVisu.Controls
         public Menu()
         {
             InitializeComponent();
-            
         }
 
         private void NewImage_OnClick(object sender, RoutedEventArgs e)
@@ -50,8 +51,6 @@ namespace GygaxVisu.Controls
                 _viewModel.Items.Add(new Image(res.FileName));
             }
         }
-
-
 
         private void VideoFromFile_OnClick(object sender, RoutedEventArgs e)
         {
@@ -100,7 +99,7 @@ namespace GygaxVisu.Controls
             //Create a new instance of openFileDialog
             var res = new OpenFileDialog
             {
-                Filter = "Video Files|*.avi;*.wmv;*.mp4;*.mpg;*.mkv;..."
+                Filter = "Video Files|*.avi;*.wmv;*.mp4;*.mpg;*.mkv;*.mts;..."
             };
 
             if (res.ShowDialog() == DialogResult.OK)
@@ -156,15 +155,71 @@ namespace GygaxVisu.Controls
 
             if (res.ShowDialog() == DialogResult.OK)
             {
-                var vsfm = new VsfmReconstruction(res.FileName);
-                //_viewModel.Items.Add(vsfm);
+                var vsfm = VsfmReconstruction.OpenMultiple(res.FileName);
 
-                //MyProcessor mp = new MyProcessor();
-                //mp.Source = vsfm;
-                //vsfm.PropertyChanged += mp.SourceUpdated;
-
-                _viewModel.Items.Add(vsfm);
+                foreach (var reconstruction in vsfm.Where(x => ((NViewMatch)x.Data).Transform != Matrix3D.Identity))
+                {
+                    _viewModel.Items.Add(reconstruction);
+                }
+                
             }
+        }
+
+        private void VsfmInclImages_OnClick(object sender, RoutedEventArgs e)
+        {
+            var res = new OpenFileDialog
+            {
+                Filter = "NView Match|*.nvm;..."
+            };
+
+            if (res.ShowDialog() == DialogResult.OK)
+            {
+                var vsfm = VsfmReconstruction.OpenMultiple(res.FileName);
+                
+                foreach (var reconstruction in vsfm)
+                {
+                    _viewModel.Items.Add(reconstruction);
+
+                    foreach (var image in ((NViewMatch)reconstruction.Data).CameraPositions)
+                    {
+                        _viewModel.Items.Add(new Image(image.File));
+                    }
+                }
+
+            }
+        }
+
+        private void Correspondences_OnClick(object sender, RoutedEventArgs e)
+        {
+            var res = new OpenFileDialog
+            {
+                Filter = "CSV file|*.csv;..."
+            };
+
+            if (res.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            var cs = new CoordinateSystem();
+
+
+            cs.LoadCorrespondences(res.FileName);
+
+            cs.Transformation = CoordinateSystem.OpenTransformation(new Uri(Path.GetDirectoryName(res.FileName) + @"\sparse.tfm"));
+
+            if (!Path.GetFileName(res.FileName).Equals("Correspondences.csv") &&
+                Path.GetFileName(res.FileName).Split('.').Length == 3)
+            {
+                cs.Transformation = CoordinateSystem.OpenTransformation(new Uri(Path.GetDirectoryName(res.FileName) + @"\sparse."+ Path.GetFileName(res.FileName).Split('.')[1] + ".tfm"));
+            }
+            
+            var str = new Streamable()
+            {
+                Data = cs
+            };
+            
+            _viewModel.Items.Add(str);
         }
 
         private void Scene_OnClick(object sender, RoutedEventArgs e)
@@ -176,7 +231,7 @@ namespace GygaxVisu.Controls
 
             if (res.ShowDialog() == DialogResult.OK)
             {
-                var sceneReader = new SceneScannerPositionReader(res.FileName);
+                var sceneReader = new SceneScannerPositionLoader(res.FileName);
                 _viewModel.Items.Add(sceneReader);
 
                 //_viewModel.Items.Add();
@@ -199,6 +254,94 @@ namespace GygaxVisu.Controls
 
                 //ifcTree.Items.Add(ifcModel.Tree);
             }
+        }
+
+        private void Correction_OnClick(object sender, RoutedEventArgs e)
+        {
+            var cs = new CoordinateSystem();
+
+            cs.LoadCorrespondences(@"C:\Users\Philipp\Desktop\Correspondences.csv");
+            
+            //cs.AddTestelements();
+            cs.CalculateHomography();
+
+            //cs.SaveTransform(@"C:\Users\Philipp\Desktop\Transform.csv");
+        }
+
+        private void ColumnIcp_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.Icp(true);
+        }
+
+        private void ColumnNoIcp_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.Icp(false);
+        }
+
+        private void CalculateTexture_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.CalculateTexture();
+        }
+
+        private void GenerateAllTextures_OnClick(object sender, RoutedEventArgs e)
+        {
+            //var m = new Methods();
+            //m.GenerateAllTextures();
+
+            var res = new OpenFileDialog
+            {
+                Filter = "NView Match|*.nvm;..."
+            };
+
+            if (!(res.ShowDialog() == DialogResult.OK))
+            {
+                return;
+            }
+
+            var res2 = new OpenFileDialog
+            {
+                Filter = "Ifc Files|*.ifc;..."
+            };
+
+            if (!(res2.ShowDialog() == DialogResult.OK))
+            {
+                return;
+            }
+
+            FolderBrowserDialog res3 = new FolderBrowserDialog();
+
+            if (!(res3.ShowDialog() == DialogResult.OK))
+            {
+                return;
+            }
+
+            Methods.CalculateOneTexture(res.FileName, res2.FileName, res3.SelectedPath + @"\");
+        }
+
+        private void BuildMasks_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.CalculateTexture(false, true);
+        }
+
+        private void ExtractImagePoints_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.ExtractFromImageCoordinates();
+        }
+
+        private void DrawTextures_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.DrawTexture();
+        }
+
+        private void ClearWorkspace_OnClick(object sender, RoutedEventArgs e)
+        {
+            _viewModel.Clear();
         }
     }
 }

@@ -22,19 +22,31 @@
                 <MenuItem Header="_IFC file" Click="OpenIfcFile_OnClick"/>
                 <Separator/>
                 <MenuItem Header="_Visual SFM reconstruction" Click="Vsfm_OnClick"/>
+                <MenuItem Header="_Visual SFM reconstruction incl. Images" Click="VsfmInclImages_OnClick"/>
                 <MenuItem Header="_Scene Scanner Positions" Click="Scene_OnClick"/>
+                <MenuItem Header="_Correspondences" Click="Correspondences_OnClick"/>
                 <Separator/>
                 <MenuItem Header="_Exit" Click="MenuItemExit_OnClick"/>
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem IsCheckable="True" Header="_Show common 3D space" IsChecked="{Binding ShowCommon3DSpace, Mode=TwoWay}"></MenuItem>
+                <MenuItem IsCheckable="True" Header="_Use global camera" IsChecked="{Binding UseGlobalCamera, Mode=TwoWay}"></MenuItem>
+                <MenuItem IsCheckable="True" Header="_Show Console" IsChecked="{Binding ShowConsole, Mode=TwoWay}"></MenuItem>
+                <MenuItem IsCheckable="True" Header="_Show Selected in Main Stage" IsChecked="{Binding ShowSelectedInMainStage, Mode=TwoWay}"></MenuItem>
+                <MenuItem Header="_Clear Workspace" Click="ClearWorkspace_OnClick"/>
             </MenuItem>
-            <MenuItem Header="_Process">
+            <MenuItem Header="_Processing">
+                <MenuItem Header="_Calculate correction" Click="Correction_OnClick"></MenuItem>
+                <MenuItem Header="_Correspondence matching + ICP" Click="ColumnIcp_OnClick"></MenuItem>
+                <MenuItem Header="_Correspondence matching" Click="ColumnNoIcp_OnClick"></MenuItem>
+                <MenuItem Header="_Generate Texture" Click="CalculateTexture_OnClick"></MenuItem>
+                <MenuItem Header="_Generate all Textures" Click="GenerateAllTextures_OnClick"></MenuItem>
+                <MenuItem Header="_Build Masks" Click="BuildMasks_OnClick"></MenuItem>
+                <MenuItem Header="_Extract form Image Points" Click="ExtractImagePoints_OnClick"></MenuItem>
+                <MenuItem Header="_Draw Textures" Click="DrawTextures_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="Supported libraries"/>
-                <Separator/>
-                <MenuItem Header="_About Gygax"/>
+                <MenuItem Header="_Sorry, no help yet!"/>
             </MenuItem>
         </Menu>
 

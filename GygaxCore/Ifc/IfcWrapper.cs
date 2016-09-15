@@ -11,6 +11,7 @@ using SharpDX;
 using SharpDX.Direct3D11;
 using IImage = Emgu.CV.IImage;
 using Point = System.Drawing.Point;
+using System.Linq;
 
 namespace GygaxCore.Ifc
 {
@@ -98,6 +99,8 @@ namespace GygaxCore.Ifc
         public long indexOffsetForWireFrame;
 
         //public IFCTreeItem ifcTreeItem = null;
+
+
     }
 
     /// <summary>
@@ -286,6 +289,7 @@ namespace GygaxCore.Ifc
         float size = 0;
 
         public TreeNode<TreeElement> Tree;
+        public string IfcFile;
 
         public object Data { get; set; }
 
@@ -326,6 +330,8 @@ namespace GygaxCore.Ifc
                 //int ifcModel = IfcEngine.x86.sdaiOpenModelBN(0, sPath, "IFC2X3_TC1.exp");
                 //Int64 ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, sPath,"IFC2X3_TC1.exp");
 
+                //var path = System.Text.Encoding.UTF8.GetBytes(sPath);
+                IfcFile = sPath;
                 var path = System.Text.Encoding.UTF8.GetBytes(sPath);
 
                 Int64 ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, sPath, "Ifc/IFC2X3_TC1.exp");
@@ -469,6 +475,11 @@ namespace GygaxCore.Ifc
             }
 
             return false;
+        }
+        
+        public static string GetValidPathName(string path)
+        {
+            return Path.GetInvalidFileNameChars().Aggregate(path, (current, c) => current.Replace(c.ToString(), string.Empty));
         }
 
         private void GenerateWireFrameGeometry(long ifcModel, IFCItem ifcItem)
@@ -1377,7 +1388,7 @@ namespace GygaxCore.Ifc
             {
                 InitalizeDeviceBuffer();
 
-                this._destControl.Refresh();
+                this._destControl?.Refresh();
 
                 return true;
             }

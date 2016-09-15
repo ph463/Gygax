@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading;
-using GygaxCore.DataStructures;
+using GygaxCore.DataStructures.DataStructures;
+using GygaxCore.DataStructures.DataStructures.DataStructures;
 using GygaxCore.Interfaces;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
     public class PotreeLoader : Pointcloud, IStreamable
     {
@@ -23,7 +24,7 @@ namespace GygaxCore
         
         private void LoadThreadFunction()
         {
-            var pt = new Potree(new Uri(Filename));
+            var pt = new PotreeNode(new Uri(Filename));
             
             var points = new PointGeometry3D();
             var col = new Color4Collection();

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
-using GygaxCore;
+using GygaxCore.DataStructures;
 using HelixToolkit.Wpf.SharpDX;
 using SharpDX;
 using GeometryModel3D = HelixToolkit.Wpf.SharpDX.GeometryModel3D;
@@ -39,6 +39,8 @@ namespace GygaxVisu.Visualizer
             model.Color = Color.White;
 
             model.Geometry = pointcloud;
+
+            model.Transform = new MatrixTransform3D(Matrix3D.Identity);
 
             models.Add(model);
 

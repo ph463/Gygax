@@ -16,7 +16,7 @@ using PclWrapper;
 using SharpDX;
 using IImage = Emgu.CV.IImage;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
     public class Pointcloud : PCD, IStreamable
     {

@@ -6,11 +6,11 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
-using GygaxCore;
-using GygaxCore.Ifc;
 using GygaxCore.Interfaces;
+using GygaxVisu.Helpers;
 using HelixToolkit.Wpf.SharpDX;
 using SharpDX;
+using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = SharpDX.Color;
 
 namespace GygaxVisu.Controls
@@ -27,6 +27,8 @@ namespace GygaxVisu.Controls
 
         public PhongMaterial Material = PhongMaterials.Red;
 
+        private Camera LocalCamera;
+
         public Common3DSpace()
         {
             InitializeComponent();
@@ -39,6 +41,15 @@ namespace GygaxVisu.Controls
 
             SetBinding(DataContextProperty, new Binding());
 
+            LocalCamera = Viewport.Camera;
+
+            if (Control3D.GlobalCamera == null)
+            {
+                Control3D.GlobalCamera = Viewport.Camera;
+            }
+
+            //Viewport.Camera = Control3D.GlobalCamera;
+
             Viewport.MouseDoubleClick += ViewportOnMouseDoubleClick;
         }
 
@@ -49,7 +60,7 @@ namespace GygaxVisu.Controls
 
         private void SetLight()
         {
-            Viewport.Items.Add(new DirectionalLight3D { Direction = new SharpDX.Vector3(1,1,1) });
+            Viewport.Items.Add(new DirectionalLight3D {Direction = new SharpDX.Vector3(1, 1, 1)});
             Viewport.Items.Add(new DirectionalLight3D { Direction = new SharpDX.Vector3(-1, -1, -1) });
         }
 
@@ -71,7 +82,7 @@ namespace GygaxVisu.Controls
                 }
             }
 
-            Viewport.ZoomExtents();
+            ViewportHelper.ZoomExtents(Viewport);
         }
 
         public LineGeometryModel3D GetGrid()
@@ -120,5 +131,21 @@ namespace GygaxVisu.Controls
             }
         }
 
+        private void Viewport_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var hits = Viewport.FindHits(e.GetPosition(this));
+
+            if (hits.Count == 0) return;
+
+            Console.WriteLine(hits[0].PointHit.X + "," + hits[0].PointHit.Y + "," + hits[0].PointHit.Z);
+
+            //ViewportHelper.AddSphere(hits[0].PointHit.ToVector3(), 0.1, PhongMaterials.Yellow, Viewport);
+
+        }
+
+        public void ViewModelOnClearWorkspace(object sender, EventArgs eventArgs)
+        {
+            Viewport.Items.Clear();
+        }
     }
 }

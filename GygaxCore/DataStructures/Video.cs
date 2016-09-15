@@ -8,11 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using DirectShowLib;
 using Emgu.CV;
+using GygaxCore.DataStructures.DataStructures.Interfaces;
 using GygaxCore.Interfaces;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
-    public class Video : Streamable, ICamera
+    public class Video : Streamable, IVideo
     {
         private readonly Capture _capture = null;
 

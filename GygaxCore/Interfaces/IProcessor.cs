@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GygaxCore.Interfaces;
 
-namespace GygaxCore.Interfaces
+namespace GygaxCore.DataStructures.DataStructures.Interfaces
 {
     public interface IProcessor : IStreamable
     {

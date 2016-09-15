@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:GygaxVisu.Controls"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              xmlns:sdx="clr-namespace:SharpDX;assembly=SharpDX"
-             xmlns:gygaxCore="clr-namespace:GygaxCore;assembly=GygaxCore"
+             xmlns:gygaxCore="clr-namespace:GygaxCore.DataStructures;assembly=GygaxCore"
              xmlns:devices="clr-namespace:GygaxCore.Devices;assembly=GygaxCore"
              mc:Ignorable="d" >
     <Grid Name="MainGrid" DataContext="{Binding ElementName=StreamList, Path=SelectedItem}">

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DirectShowLib;
 using Emgu.CV;
-using GygaxCore;
+using GygaxCore.DataStructures;
 using GygaxCore.Interfaces;
 
 namespace GygaxCore.Devices

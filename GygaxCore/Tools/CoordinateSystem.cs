@@ -2,16 +2,24 @@
 using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Accord.Math.Decompositions;
 using Emgu.CV.Features2D;
+using HelixToolkit.Wpf;
+using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
+using Microsoft.VisualBasic.FileIO;
 using SharpDX;
 using Matrix = Accord.Math.Matrix;
+using System.Windows.Media.Media3D;
+using Accord.Imaging;
+using AForge;
 
-namespace GygaxCore
+namespace GygaxCore.DataStructures
 {
     /// <summary>
     /// http://nghiaho.com/?page_id=671
@@ -23,6 +31,8 @@ namespace GygaxCore
 
         public List<Correspondence> Correspondences = new List<Correspondence>();
 
+        public Matrix3D Transformation;
+
         public struct Correspondence
         {
             public Vector3 ParentCoordinateSystem;
@@ -31,13 +41,14 @@ namespace GygaxCore
 
         public Correspondence Centroid;
 
-        public Quaternion Rotation
+        public SharpDX.Quaternion Rotation
         {
             get
             {
-                Quaternion returnValue;
+                SharpDX.Quaternion returnValue;
                 var rotationMatrix = RotationMatrix;
-                Quaternion.RotationMatrix(ref rotationMatrix, out returnValue);
+                rotationMatrix.Transpose();
+                SharpDX.Quaternion.RotationMatrix(ref rotationMatrix, out returnValue);
                 return returnValue;
             }
         }
@@ -64,7 +75,7 @@ namespace GygaxCore
             (float)_matrix[0, 0], (float)_matrix[0, 1], (float)_matrix[0, 2],
             (float)_matrix[1, 0], (float)_matrix[1, 1], (float)_matrix[1, 2],
             (float)_matrix[2, 0], (float)_matrix[2, 1], (float)_matrix[2, 2]);
-
+        
         private double[,] _matrix = new double[3,3];
 
         public Vector3 Translation;
@@ -178,6 +189,154 @@ namespace GygaxCore
 
             Scaling /= Correspondences.Count;
         }
+
+        public void LoadCorrespondences(string filename)
+        {
+            using (TextFieldParser parser = new TextFieldParser(filename))
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                while (!parser.EndOfData)
+                {
+                    //Processing row
+                    string[] fields = parser.ReadFields();
+
+                    if (fields.Count() != 6)
+                        return;
+
+                    Correspondences.Add(new Correspondence()
+                    {
+                        LocalCoordinateSystem = new Vector3(
+                            float.Parse(fields[0]),
+                            float.Parse(fields[1]),
+                            float.Parse(fields[2])
+                            ),
+                        ParentCoordinateSystem = new Vector3(
+                            float.Parse(fields[3]),
+                            float.Parse(fields[4]),
+                            float.Parse(fields[5])
+                            )
+                    });
+
+                }
+            }
+        }
+        
+        public static Matrix3D OpenTransformation(Uri filename)
+        {
+            if (!File.Exists(filename.LocalPath))
+                return Matrix3D.Identity;
+
+            StreamReader sr = new StreamReader(filename.LocalPath, ASCIIEncoding.ASCII);
+
+            var s = Array.ConvertAll(sr.ReadLine().Trim().Split(','), double.Parse);
+
+            if (s.Count() != 16)
+                throw new Exception("Not a proper transformation file");
+
+            return new Matrix3D
+            {
+                M11 = s[0],
+                M12 = s[1],
+                M13 = s[2],
+                M14 = s[3],
+                M21 = s[4],
+                M22 = s[5],
+                M23 = s[6],
+                M24 = s[7],
+                M31 = s[8],
+                M32 = s[9],
+                M33 = s[10],
+                M34 = s[11],
+                OffsetX = s[12],
+                OffsetY = s[13],
+                OffsetZ = s[14],
+                M44 = s[15],
+            };
+        }
+
+        public static void WriteTransformation(Uri filename, Matrix3D transformation)
+        {
+            var t = transformation;
+
+            var p = new[]
+            {
+                t.M11, t.M12, t.M13, t.M14,
+                t.M21, t.M22, t.M23, t.M24,
+                t.M31, t.M32, t.M33, t.M34,
+                t.OffsetX, t.OffsetY, t.OffsetZ,t.M44,
+            };
+
+
+            var l = string.Join(",", p.Select(c => c.ToString(CultureInfo.InvariantCulture)).ToArray());
+
+            using (StreamWriter writer =
+                    new StreamWriter(filename.LocalPath))
+            {
+                writer.Write(l);
+            }
+
+        }
+
+        //public void SaveTransform(string filename)
+        //{
+        //    const string separator = ",";
+
+        //    using (StreamWriter writer = new StreamWriter(filename))
+        //    {
+        //        writer.WriteLine(
+        //            RotationMatrix.M11 + separator +
+        //            RotationMatrix.M12 + separator +
+        //            RotationMatrix.M13 + separator +
+        //            RotationMatrix.M21 + separator +
+        //            RotationMatrix.M22 + separator +
+        //            RotationMatrix.M23 + separator +
+        //            RotationMatrix.M31 + separator +
+        //            RotationMatrix.M32 + separator +
+        //            RotationMatrix.M33 + separator +
+        //            Translation.X + separator +
+        //            Translation.Y + separator +
+        //            Translation.Z + separator +
+        //            Scaling
+        //            );
+        //    }
+        //}
+
+        //public void LoadTransform(string filename)
+        //{
+        //    using (TextFieldParser parser = new TextFieldParser(filename))
+        //    {
+        //        parser.TextFieldType = FieldType.Delimited;
+        //        parser.SetDelimiters(",");
+        //        while (!parser.EndOfData)
+        //        {
+        //            //Processing row
+        //            string[] fields = parser.ReadFields();
+
+        //            if (fields.Count() != 13)
+        //                return;
+
+        //            _matrix[0, 0] = float.Parse(fields[0]);
+        //            _matrix[0, 1] = float.Parse(fields[1]);
+        //            _matrix[0, 2] = float.Parse(fields[2]);
+        //            _matrix[1, 0] = float.Parse(fields[3]);
+        //            _matrix[1, 1] = float.Parse(fields[4]);
+        //            _matrix[1, 2] = float.Parse(fields[5]);
+        //            _matrix[2, 0] = float.Parse(fields[6]);
+        //            _matrix[2, 1] = float.Parse(fields[7]);
+        //            _matrix[2, 2] = float.Parse(fields[8]);
+
+        //            Translation = new Vector3(
+        //                float.Parse(fields[9]),
+        //                float.Parse(fields[10]),
+        //                float.Parse(fields[11])
+        //                );
+
+        //            Scaling = float.Parse(fields[12]);
+
+        //        }
+        //    }
+        //}
 
         public void AddTestelements()
         {
