@@ -1,5 +1,13 @@
 // This is the main DLL file.
 
+#ifdef __cplusplus_cli
+#define generic __identifier(generic)
+#endif
+#include <boost/filesystem.hpp>
+#ifdef __cplusplus_cli
+#undef generic
+#endif
+
 #include "stdafx.h"
 #include <string>
 #include <iostream>

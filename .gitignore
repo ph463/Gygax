@@ -253,8 +253,6 @@ paket-files/
 .idea/
 *.sln.iml
 
-Gygax/Method/
-
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -262,3 +260,11 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
+
+ALL_BUILD.vcxproj.filters
+PclWrapper.sln
+PclWrapper.vcxproj
+PclWrapper.vcxproj.filters
+ZERO_CHECK.vcxproj
+ZERO_CHECK.vcxproj.filters
+cmake_install.cmake

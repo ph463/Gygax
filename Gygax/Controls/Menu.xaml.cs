@@ -347,7 +347,7 @@ namespace GygaxVisu.Controls
             }
 
             var m = new Methods();
-            m.DrawTexture(res.FileName);
+            m.DrawTexture();
         }
 
         private void ClearWorkspace_OnClick(object sender, RoutedEventArgs e)
