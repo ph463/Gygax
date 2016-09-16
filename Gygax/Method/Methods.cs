@@ -154,6 +154,21 @@ namespace GygaxVisu.Method
             };
         }
 
+        public static void ExportToObject()
+        {
+            var ifcFile = @"C:\Users\Philipp\Documents\CIT\Bridge 1\IFC\Bridge1_v3.ifc";
+
+            var f = new IfcViewerWrapper();
+            f.OpenIFCFile(ifcFile);
+
+            //var p = IfcVisualizer.GetItems(f, false, new[] {"Concrete-Round-Column:Pier:251769"});
+            var p = IfcVisualizer.GetItems(f, false);
+
+            var objHandler = new ObjHandler();
+            objHandler.Export(p, @"C:\Users\Philipp\Desktop\test2");
+
+        }
+
         public static void CheckFrustum(ref List<CameraPosition> cameraPositions,ref List<Triangle> triangles, out Dictionary<Triangle, List<CameraPosition>> dict, out Dictionary<CameraPosition, List<Triangle>> tris)
         {
 
