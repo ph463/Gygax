@@ -44,6 +44,7 @@
                 <MenuItem Header="_Build Masks" Click="BuildMasks_OnClick"></MenuItem>
                 <MenuItem Header="_Extract form Image Points" Click="ExtractImagePoints_OnClick"></MenuItem>
                 <MenuItem Header="_Draw Textures" Click="DrawTextures_OnClick"></MenuItem>
+                <MenuItem Header="_Export Object" Click="ObjectExport_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Sorry, no help yet!"/>

@@ -354,5 +354,10 @@ namespace GygaxVisu.Controls
         {
             _viewModel.Clear();
         }
+
+        private void ObjectExport_OnClick(object sender, RoutedEventArgs e)
+        {
+            Methods.ExportToObject();
+        }
     }
 }
