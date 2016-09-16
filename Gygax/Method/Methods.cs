@@ -690,5 +690,10 @@ namespace GygaxVisu.Method
 
             return new Ray(cameraPosition.CameraCenter.ToVector3(), direction.ToVector3());
         }
+
+        public void MethodA()
+        {
+            Console.WriteLine("this is method A");
+        }
     }
 }
