@@ -31,7 +31,7 @@ namespace GygaxCore.DataStructures
             return OpenMultiple(filename, loadImages, filter)[0];
         }
 
-        public static NViewMatch[] OpenMultiple(Uri filename, bool loadImages = true, string filter = "")
+        public static NViewMatch[] OpenMultiple(Uri filename, bool loadImages = true, string filter = "", bool loadPatches = true)
         {
             List<NViewMatch> models = new List<NViewMatch>();
             
@@ -114,10 +114,7 @@ namespace GygaxCore.DataStructures
                     //cp.Width = 7952;
                     //cp.Height = 5304;
 
-                    cp.OpeningAngleDiagonal = 2*
-                                              Math.Atan(
-                                                  Math.Sqrt(Math.Pow(cp.Width/2.0, 2) + Math.Pow(cp.Height/2.0, 2))/
-                                                  cp.FocalLength);
+                   
 
                     //https://msdn.microsoft.com/en-us/library/windows/desktop/ms534416(v=vs.85).aspx
 
@@ -133,21 +130,27 @@ namespace GygaxCore.DataStructures
                         }
                         else
                         {
-                            using (ExifReader reader = new ExifReader(cp.File))
-                            {
-                                UInt32 width;
-                                reader.GetTagValue(ExifTags.PixelXDimension, out width);
+                            //using (ExifReader reader = new ExifReader(cp.File))
+                            //{
+                            //    UInt32 width;
+                            //    reader.GetTagValue(ExifTags.PixelXDimension, out width);
 
-                                UInt32 height;
-                                reader.GetTagValue(ExifTags.PixelYDimension, out height);
-                                
-                                cp.Width = Convert.ToInt32(width);
-                                cp.Height = Convert.ToInt32(height);
-                            }
-                            
+                            //    UInt32 height;
+                            //    reader.GetTagValue(ExifTags.PixelYDimension, out height);
+
+                            //    cp.Width = Convert.ToInt32(width);
+                            //    cp.Height = Convert.ToInt32(height);
+                            //}
+
+                            cp.Width = 7968;
+                            cp.Height = 5320;
+
                             cp.ImageDiagonal = Math.Sqrt(Math.Pow(cp.Width, 2) + Math.Pow(cp.Height, 2));
-                            
                         }
+
+                        cp.OpeningAngleDiagonal = 2 * Math.Atan(
+                            Math.Sqrt(Math.Pow(cp.Width / 2.0, 2) + Math.Pow(cp.Height / 2.0, 2)) /
+                            cp.FocalLength);
 
                         nvm.CameraPositions.Add(cp);
                     }
@@ -167,30 +170,39 @@ namespace GygaxCore.DataStructures
                 //  Line gives number of patches
                 int numberOfPatches = Convert.ToInt32(s);
 
-                for (int i = 0; i < numberOfPatches; i++)
+
+                if (loadPatches)
                 {
-                    var patch = new Patch();
+                    for (int i = 0; i < numberOfPatches; i++)
+                    {
+                        var patch = new Patch();
 
-                    patch.Color = new SharpDX.Vector3();
-                    patch.Position = new Vector3();
+                        patch.Color = new SharpDX.Vector3();
+                        patch.Position = new Vector3();
 
-                    s = sr.ReadLine().Trim();
+                        s = sr.ReadLine().Trim();
 
-                    float[] values = Array.ConvertAll(s.Split(' '), float.Parse);
+                        float[] values = Array.ConvertAll(s.Split(' '), float.Parse);
 
-                    patch.Position.X = values[0];
-                    patch.Position.Y = values[1];
-                    patch.Position.Z = values[2];
+                        patch.Position.X = values[0];
+                        patch.Position.Y = values[1];
+                        patch.Position.Z = values[2];
 
-                    patch.Color.Red = values[3];
-                    patch.Color.Green = values[4];
-                    patch.Color.Blue = values[5];
+                        patch.Color.Red = values[3];
+                        patch.Color.Green = values[4];
+                        patch.Color.Blue = values[5];
 
-                    patch.NumberOfCameras = Convert.ToInt32(values[6]);
+                        patch.NumberOfCameras = Convert.ToInt32(values[6]);
 
-                    nvm.Patches.Add(patch);
+                        nvm.Patches.Add(patch);
+                    }
                 }
-                
+                else
+                {
+                    for (int i = 0; i < numberOfPatches; i++)
+                        sr.ReadLine();
+                }
+
                 //var maxX = nvm.Patches.Max(p => p.Position.X);
                 //var minX = nvm.Patches.Min(p => p.Position.X);
 
