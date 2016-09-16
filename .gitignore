@@ -261,6 +261,7 @@ cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
 
+ALL_BUILD.vcxproj
 ALL_BUILD.vcxproj.filters
 PclWrapper.sln
 PclWrapper.vcxproj
