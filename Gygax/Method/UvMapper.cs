@@ -33,7 +33,7 @@ namespace GygaxVisu
 
         public string TextureFilename { get; set; }
 
-        public int Resolution = 1000;
+        public int Resolution = 500;
 
         public UvMapper(MeshGeometry3D geometry, IfcMeshGeometryModel3D[] model, string elementName = "", bool drawTriangles = false)
         {
@@ -424,17 +424,17 @@ namespace GygaxVisu
 
         private delegate Bgr DoAfterGetAddresses(int x, int y);
 
-        public void GenerateSurfaceImageryFromCameraList(List<CameraPosition> cameraPositions, List<Triangle> triangles, bool generateTextureFile = true, bool generateMaskFile = false)
+        public void GenerateSurfaceImageryFromCameraList(ref Dictionary<Triangle, List<CameraPosition>> dict, ref Dictionary<CameraPosition, List<Triangle>> tris, List<CameraPosition> cameraPositions, List<Triangle> triangles, bool generateTextureFile = true, bool generateMaskFile = false)
         {
             var projectionBase = new PlaneReconstructor.ProjectionBase();
             
             var planeReconstructor = new PlaneReconstructor(cameraPositions, projectionBase, null, _model);
 
             planeReconstructor.Init();
+            planeReconstructor.Dict = dict;
+            planeReconstructor.TrianglesToConsider = tris;
 
-            //planeReconstructor.Triangles = triangles;
-            
-            //Image<Bgr, Byte> image = new Image<Bgr, Byte>(TextureWidth, TextureHeight);
+            //planeReconstructor.Triangles = allTriangles;
 
             var image = new ReconstructionContainer(TextureWidth, TextureHeight);
 
@@ -446,18 +446,8 @@ namespace GygaxVisu
             //foreach (var triangle in triangles)
             Parallel.ForEach(triangles, triangle =>
             {
-                //var u1 = _geometry.Positions[_geometry.Indices[i]];
-                //var u2 = _geometry.Positions[_geometry.Indices[i + 1]];
-                //var u3 = _geometry.Positions[_geometry.Indices[i + 2]];
-
-                //var pos1 = new Vector2(_geometry.TextureCoordinates[i].X * TextureWidth, _geometry.TextureCoordinates[i].Y * TextureHeight);
-                //var pos2 = new Vector2(_geometry.TextureCoordinates[i + 1].X * TextureWidth, _geometry.TextureCoordinates[i + 1].Y * TextureHeight);
-                //var pos3 = new Vector2(_geometry.TextureCoordinates[i + 2].X * TextureWidth, _geometry.TextureCoordinates[i + 2].Y * TextureHeight);
-
-                //planeReconstructor.element++;
-
                 planeReconstructor.ReconstructRayTracer(
-                    ref image,
+                    image,
                     triangle,
                     TextureWidth,
                     TextureHeight

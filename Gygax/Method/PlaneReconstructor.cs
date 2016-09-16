@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.VisualStyles;
 using Accord.MachineLearning.Geometry;
@@ -260,7 +261,7 @@ namespace GygaxVisu
         }
 
         //public void ReconstructRayTracer(ref Image<Bgr, byte> surfaceReconstruction, Triangle t, int textureWidth, int textureHeight)
-        public void ReconstructRayTracer(ref ReconstructionContainer surfaceReconstruction, Triangle t, int textureWidth, int textureHeight)
+        public void ReconstructRayTracer(ReconstructionContainer surfaceReconstruction, Triangle t, int textureWidth, int textureHeight)
         {
             var p1 = t.Corners[0].Coordinates3D;
             var p2 = t.Corners[1].Coordinates3D;
@@ -281,11 +282,18 @@ namespace GygaxVisu
 
             var minY = Math.Min(Math.Min(u1.Y, u2.Y), u3.Y);
             var maxY = Math.Max(Math.Max(u1.Y, u2.Y), u3.Y);
-            
 
-            for (int y = (int) Math.Floor(minY); y <= (int) Math.Ceiling(maxY); y++)
+            var yStart = (int) Math.Floor(minY);
+            var yEnd = (int) Math.Ceiling(maxY);
+
+            var xStart = (int) Math.Floor(minX);
+            var xEnd = (int) Math.Ceiling(maxX);
+
+            Parallel.For(yStart, yEnd, y =>
+            //for (int y = yStart; y <= yEnd; y++)
             {
-                for (int x = (int) Math.Floor(minX); x <= (int) Math.Ceiling(maxX); x++)
+                for (int x = xStart; x <= xEnd; x++)
+                //Parallel.For(xStart, xEnd, x =>
                 {
                     var m = Accord.Math.Matrix.Create(2, 3, 0.0);
 
@@ -299,11 +307,11 @@ namespace GygaxVisu
                     m[1, 2] = y - u1.Y;
 
                     var r = new ReducedRowEchelonForm(m);
-                    
-                    var a = (float)r.Result[0, 2];
-                    var b = (float)r.Result[1, 2];
-                    
-                    var result = a * vector1Image + b * vector2Image;
+
+                    var a = (float) r.Result[0, 2];
+                    var b = (float) r.Result[1, 2];
+
+                    var result = a*vector1Image + b*vector2Image;
                     var result3D = a*vector13D + b*vector23D;
 
                     if (!PointInTriangle(u1 + result, u1, u2, u3))
@@ -328,9 +336,9 @@ namespace GygaxVisu
                     //surfaceReconstruction.Points[y * surfaceReconstruction.Width + x] = GetBestPixel(pixelInfo.Intersections);
 
                     var bestPixel = GetBestPixel(pixelInfo.Intersections);
-                    surfaceReconstruction.Points[y*textureWidth+x]=bestPixel;
+                    surfaceReconstruction.Points[y*textureWidth + x] = bestPixel;
                 }
-            }
+            });
         }
 
 
@@ -421,8 +429,8 @@ namespace GygaxVisu
         private RayTracerPixelInfo GetClosestImageMatching(SharpDX.Point p, Triangle t)
         {
             // Get 3D coordinates to p -> plane point
-            var x = ((p.X - _image.Width/2.0)/_scalingFactor) + _centerX;
-            var y = ((p.Y - _image.Height/2.0)/_scalingFactor) + _centerY;
+            var x = ((p.X - _image.Width / 2.0) / _scalingFactor) + _centerX;
+            var y = ((p.Y - _image.Height / 2.0) / _scalingFactor) + _centerY;
 
             var pp = new Vector3D(x, y, _projectionBase.Distance);
 
@@ -431,12 +439,16 @@ namespace GygaxVisu
             return GetClosestImageMatching(planePoint, t);
         }
 
+        public Dictionary<Triangle, List<CameraPosition>> Dict;
+        public Dictionary<CameraPosition, List<Triangle>> TrianglesToConsider;
+
         private RayTracerPixelInfo GetClosestImageMatching(Vector3D planePoint, Triangle t)
         {
             var returnValue = new RayTracerPixelInfo(new List<RayTracerPixelInfo.Intersection>());
             
             //foreach (var cameraPosition in t.TrianglesToConsider.Keys)
-            foreach (var cameraPosition in _cameraPositions)
+            //foreach (var cameraPosition in _cameraPositions)
+            foreach(var cameraPosition in Dict[t])
             {
                 RayTracerPixelInfo.Intersection intersection;
 
@@ -534,7 +546,8 @@ namespace GygaxVisu
             //Stopwatch.Start();
 
             //foreach (var triangle in t.TrianglesToConsider[cameraPosition])
-            foreach (var triangle in Triangle.Triangles)
+            //foreach (var triangle in TrianglesToConsider[t])
+            foreach (var triangle in TrianglesToConsider[cameraPosition])
             {
                 if (!Collision.RayIntersectsTriangle(
                     ref ray,
@@ -545,7 +558,7 @@ namespace GygaxVisu
                     )
                     continue;
 
-                if (intersectionDistance < planeDistance)
+                if (intersectionDistance < planeDistance-0.01)
                     return true;
             }
 
@@ -588,15 +601,15 @@ namespace GygaxVisu
 
         private RayTracerPixelInfo.Intersection GetClosestImageMatchingPlanar(Vector3D planePoint, CameraPosition cameraPosition, Triangle t)
         {
-            //if (HitsAnotherTriangleFirst(planePoint.ToVector3(), cameraPosition, t))
-            //{
-            //    return new RayTracerPixelInfo.Intersection()
-            //    {
-            //        Intersects = false
-            //    };
-            //}
+            if (HitsAnotherTriangleFirst(planePoint.ToVector3(), cameraPosition, t))
+            {
+                return new RayTracerPixelInfo.Intersection()
+                {
+                    Intersects = false
+                };
+            }
 
-            if(!rayCentersIntersect[cameraPosition.Id])
+            if (!rayCentersIntersect[cameraPosition.Id])
                 return NoIntersection;
 
             var rayPlanePoint = new Ray(cameraPosition.CameraCenter.ToVector3(), (planePoint - cameraPosition.CameraCenter).ToVector3().Normalized());
@@ -626,31 +639,12 @@ namespace GygaxVisu
 
             if (double.IsNaN(ximg) || double.IsNaN(yimg) || ximg < 0 || yimg < 0 || ximg >= cameraPosition.Width || yimg >= cameraPosition.Height)
                 return NoIntersection;
-
-
-
-            //if (cameraPosition.Image == null)
-            //{
-            //    try
-            //    {
-            //        cameraPosition.Image = new Image<Bgr, Byte>(cameraPosition.File);
-            //    }
-            //    catch (Exception)
-            //    {
-            //        Debug.WriteLine("Source image for reconstruction is null. Load it first.");
-            //        return new RayTracerPixelInfo.Intersection { Intersects = false };
-            //    }
-            //}
-
-            //if(GenerateMaskFile)
-            //    SetMask(cameraPosition, Convert.ToInt32(yimg), Convert.ToInt32(ximg));
             
             return new RayTracerPixelInfo.Intersection()
             {
                 ImageX = Convert.ToInt32(ximg),
                 ImageY = Convert.ToInt32(yimg),
                 CameraPosition = cameraPosition,
-                //Color = cameraPosition.Image[Convert.ToInt32(yimg), Convert.ToInt32(ximg)],
                 Filename = cameraPosition.File,
                 Distance = (planePoint - cameraPosition.CameraCenter).Length,
                 CameraId = cameraPosition.Id,
@@ -1144,6 +1138,8 @@ namespace GygaxVisu
     [ProtoContract]
     public class ReconstructionContainer
     {
+        public const int chunkSize = 1000000;
+
         [ProtoMember(1)]
         public int Width;
         [ProtoMember(2)]
@@ -1152,16 +1148,73 @@ namespace GygaxVisu
         [ProtoMember(3)]
         public readonly PlaneReconstructor.RayTracerPixelInfo.Intersection[] Points;
 
+        [ProtoMember(4)]
+        public int IndexStart;
+        [ProtoMember(5)]
+        public int IndexEnd;
+        [ProtoMember(6)]
+        public int TotalNumberOfElements;
+
+
         public ReconstructionContainer()
         {
         }
 
-        public ReconstructionContainer(int width, int height)
+        public ReconstructionContainer(int width, int height) : this(width, height, width*height)
+        {
+        }
+
+        public ReconstructionContainer(int width, int height, int arraySize)
         {
             Width = width;
             Height = height;
-            
-            Points = new PlaneReconstructor.RayTracerPixelInfo.Intersection[width*height];
+
+            IndexStart = 0;
+            IndexEnd = width * height;
+
+            Points = new PlaneReconstructor.RayTracerPixelInfo.Intersection[arraySize];
+
+            TotalNumberOfElements = width * height;
+        }
+
+        public static ReconstructionContainer Read(string filename)
+        {
+            ReconstructionContainer init;
+
+            try
+            {
+                using (var file = File.OpenRead(filename))
+                {
+                    init = Serializer.Deserialize<ReconstructionContainer>(file);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            var r = new ReconstructionContainer(init.Width, init.Height, init.TotalNumberOfElements);
+            Array.Copy(init.Points, 0, r.Points, init.IndexStart, init.IndexEnd - init.IndexStart);
+
+            var numberOfChunks = (int) Math.Ceiling((init.TotalNumberOfElements - 1.0)/(init.IndexEnd - init.IndexStart));
+
+            for (int i = 1; i < numberOfChunks; i++)
+            {
+                try
+                {
+                    using (var file = File.OpenRead(filename.Replace(".0.bin", "." + i + ".bin")))
+                    {
+                        var l = Serializer.Deserialize<ReconstructionContainer>(file);
+                        Array.Copy(l.Points,0,r.Points, l.IndexStart, l.IndexEnd - l.IndexStart);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+
+            return r;
         }
 
         public void Save(string filename)
@@ -1171,10 +1224,30 @@ namespace GygaxVisu
             //formatter.Serialize(stream, this);
             //stream.Close();
 
-            using (var file = File.Create(filename + ".bin"))
+            int numberOfChunks = (int)Math.Ceiling(Points.Length * 1.0/chunkSize);
+
+
+            Parallel.For(0, numberOfChunks, j =>
             {
-                Serializer.Serialize(file, this);
-            }
+                var i = j*chunkSize;
+
+                var indexStart = i;
+                var indexEnd = i + Math.Min(chunkSize, Points.Length - i);
+                var length = indexEnd - indexStart;
+
+                var r = new ReconstructionContainer(this.Width, this.Height, length)
+                {
+                    IndexStart = indexStart,
+                    IndexEnd = indexEnd
+                };
+
+                Array.Copy(Points, i, r.Points, 0, length);
+
+                using (var file = File.Create(filename.Replace(".jpg", "."+j + ".bin")))
+                {
+                    Serializer.Serialize(file, r);
+                }
+            });
         }
     }
 }

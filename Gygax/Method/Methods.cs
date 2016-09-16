@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using Accord.Statistics;
 using Emgu.CV;
 using Emgu.CV.Stitching;
 using Emgu.CV.Structure;
@@ -152,25 +154,55 @@ namespace GygaxVisu.Method
             };
         }
 
-        public static void ExportToObject()
+        public static void CheckFrustum(ref List<CameraPosition> cameraPositions,ref List<Triangle> triangles, out Dictionary<Triangle, List<CameraPosition>> dict, out Dictionary<CameraPosition, List<Triangle>> tris)
         {
-            var ifcFile = @"C:\Users\Philipp\Documents\CIT\Bridge 1\IFC\Bridge1_v3.ifc";
 
-            var f = new IfcViewerWrapper();
-            f.OpenIFCFile(ifcFile);
-            
-            //var p = IfcVisualizer.GetItems(f, false, new[] {"Concrete-Round-Column:Pier:251769"});
-            var p = IfcVisualizer.GetItems(f, false);
+            dict = new Dictionary<Triangle, List<CameraPosition>>();
+            tris = new Dictionary<CameraPosition, List<Triangle>>();
 
-            var objHandler = new ObjHandler();
-            objHandler.Export(p, @"C:\Users\Philipp\Desktop\test2");
+
+            foreach (var cameraPosition in cameraPositions)
+            {
+                var b = BoundingFrustum.FromCamera(cameraPosition.CameraCenter.ToVector3(),
+                    CameraPosition.Rotate(cameraPosition.Orientation, new Vector3D(0, 0, 1)).ToVector3(),
+                    CameraPosition.Rotate(cameraPosition.Orientation, new Vector3D(0, 1, 0)).ToVector3(),
+                    (float)cameraPosition.OpeningAngleDiagonal, 0,100,1);
+
+                foreach (var triangle in triangles)
+                {
+                    //var corners = new Vector3[3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        //corners[i] = triangle.Corners[i].Coordinates3DFloat;
+                        var ct = b.Contains(triangle.Corners[i].Coordinates3DFloat);
+
+                        if (ct != ContainmentType.Disjoint)
+                        {
+                            if (!dict.ContainsKey(triangle))
+                                dict.Add(triangle, new List<CameraPosition>());
+
+                            dict[triangle].Add(cameraPosition);
+
+                            if (!tris.ContainsKey(cameraPosition))
+                                tris.Add(cameraPosition, new List<Triangle>());
+
+                            tris[cameraPosition].Add(triangle);
+
+                            break;
+                        }
+                    } 
+                }
+            }
+
+
+            //return dict;
 
         }
 
         public static void CalculateOneTexture(
             string nvmFile, string ifcFile, string textureDirectory, bool generateTextureFile = true, bool generateMaskFile = false)
         {
-            var nvm = NViewMatchLoader.OpenMultiple(new Uri(nvmFile), false);
+            var nvm = NViewMatchLoader.OpenMultiple(new Uri(nvmFile), false,"", false);
 
             var cameraPositions = new List<CameraPosition>();
 
@@ -197,7 +229,11 @@ namespace GygaxVisu.Method
 
             var triangles = new List<Triangle>();
 
-            var p = IfcVisualizer.GetItems(f, false, new []{ "Concrete-Round-Column:Pier:251769" });
+            //var p = IfcVisualizer.GetItems(f, false, new []{ "Concrete-Round-Column:Pier:251769" });
+            var p = IfcVisualizer.GetItems(f, false);
+
+
+            //Viewport = new Viewport3DX();
 
             foreach (var item in p)
             {
@@ -211,13 +247,30 @@ namespace GygaxVisu.Method
                 item.Mapper.GenerateIndexes();
 
                 triangles.AddRange(item.Mapper.Triangles);
+                
+
+                models.Add(item);
+
+                //Viewport.Items.Add(p);
             }
 
-            foreach (var item in p)
+            Dictionary<Triangle, List<CameraPosition>> dict;
+            Dictionary<CameraPosition, List<Triangle>> tris;
+
+            CheckFrustum(ref cameraPositions, ref triangles, out dict, out tris);
+
+            var listDoGenerate =
+                p.Where(q => q.IfcName.Contains("Column")).Where(q => !q.IfcName.Contains("251769")).ToList();
+            
+
+            foreach (var item in listDoGenerate)
             {
-                item.Mapper.GenerateSurfaceImageryFromCameraList(cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
+                item.Mapper.GenerateSurfaceImageryFromCameraList(ref dict, ref tris, cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
             }
         }
+
+        //public static Viewport3DX Viewport;
+        public static List<MeshGeometryModel3D> models = new List<MeshGeometryModel3D>();
 
         public static void CalculateTexture(
             string nvmFile, string ifcFile, string textureDirectory, string[] elementName, bool generateTextureFile = true, bool generateMaskFile = false)
@@ -272,7 +325,8 @@ namespace GygaxVisu.Method
 
             foreach (var item in p)
             {
-                item.Mapper.GenerateSurfaceImageryFromCameraList(cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
+                //item.Mapper.GenerateSurfaceImageryFromCameraList(cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
+                throw new NotImplementedException();
             }
         }
 
@@ -297,26 +351,20 @@ namespace GygaxVisu.Method
                 }
             }
 
-            
-
-
         }
 
         private Dictionary<string, string> _fileAssignment = new Dictionary<string, string>();
 
 
-        public void DrawTexture()
+        public void DrawTexture(string binfilename)
         {
-            string binfilename = @"Z:\06. Data\Bridges\Philipp\Bridge 1\Textures\Concrete-Round-ColumnPier251769.jpg.bin";
-            
+            string textureFilename = binfilename.Replace(".0.bin", ".jpg").Replace(".bin", ".jpg");
+
             IterateDirectory();
 
 
-            ReconstructionContainer recon;
-            using (var file = File.OpenRead(binfilename))
-            {
-                recon = Serializer.Deserialize<ReconstructionContainer>(file);
-            }
+            var recon = ReconstructionContainer.Read(binfilename);
+
 
             Image<Bgr, Byte> image = new Image<Bgr, Byte>(recon.Width, recon.Height);
 
@@ -336,7 +384,7 @@ namespace GygaxVisu.Method
 
                     var textureX = i % recon.Width;
                     var textureY = i / recon.Width;
-                    
+
                     if (img.Height > img.Width)
                         image[textureY, textureX] = img[recon.Points[i].ImageX, recon.Points[i].ImageY];
                     else
@@ -347,44 +395,7 @@ namespace GygaxVisu.Method
                 img.Dispose();
             });
 
-            /*
-            foreach (var filename in recon.Points.Select(c => c.Filename).Distinct())
-            {
-                if (filename == null)
-                    continue;
-
-                var path = Path.GetFullPath(filename);
-
-                var img = new Image<Bgr, Byte>(_fileAssignment[path]);
-
-                for (int i = 0; i < recon.Points.Length; i++)
-                {
-                    
-                    if (filename != recon.Points[i].Filename)
-                        continue;
-
-                    var textureX = i%recon.Width;
-                    var textureY = i/recon.Width;
-
-                    //if (textureX == 89 && textureY == 172)
-                    //    Console.WriteLine(textureX + " " + textureY);
-
-
-                    if (img.Height > img.Width)
-                        image[textureY, textureX] = img[recon.Points[i].ImageX, recon.Points[i].ImageY];
-                    else
-                        image[textureY, textureX] = img[recon.Points[i].ImageY, recon.Points[i].ImageX];
-
-                }
-
-                img.Dispose();
-            }
-            */
-
-            image.Save(@"Z:\06. Data\Bridges\Philipp\Bridge 1\Textures\Concrete-Round-ColumnPier251769.jpg");
-            
-
-
+            image.Save(textureFilename);
         }
 
         public void GenerateAllTextures()
@@ -408,8 +419,6 @@ namespace GygaxVisu.Method
                 CalculateTexture(mainFile, ifcFile, textureDirectory, elementName);
             }
         }
-
-
 
         public void CalculateTexture(bool generateTextureFile = true, bool generateMaskFile = false)
         {
