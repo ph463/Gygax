@@ -690,18 +690,5 @@ namespace GygaxVisu.Method
 
             return new Ray(cameraPosition.CameraCenter.ToVector3(), direction.ToVector3());
         }
-
-        private int AnotherMethod(string hans)
-        {
-            if (hans.Equals("test"))
-                return int.MaxValue;
-
-            return int.MinValue;
-        }
-
-        public void MethodA()
-        {
-            Console.WriteLine("this is method A");
-        }
     }
 }
