@@ -698,5 +698,10 @@ namespace GygaxVisu.Method
 
             return int.MinValue;
         }
+
+        public void MethodA()
+        {
+            Console.WriteLine("this is method A");
+        }
     }
 }
