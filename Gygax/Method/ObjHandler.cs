@@ -61,7 +61,7 @@ namespace GygaxVisu
                         {
                             case "v":
                                 var e = s.Split(' ');
-                                var sl = "v "+ (Convert.ToDouble(e[1]) + translate.X) + " " + (Convert.ToDouble(e[2]) + translate.Z) + " " + (-Convert.ToDouble(e[3]) + translate.Y) ;
+                                var sl = "v "+ (Convert.ToDouble(e[1]) + translate.X) + " " + (-Convert.ToDouble(e[3]) + translate.Y) + " " + (Convert.ToDouble(e[2]) + translate.Z);
                                 vList.Add(sl);
                                 break;
                             case "vt":
@@ -77,8 +77,8 @@ namespace GygaxVisu
                                 {
                                     var ad = split[i].Split('/');
                                     st += (Convert.ToInt32(ad[0]) + offset) + "/" +
-                                            (Convert.ToInt32(ad[1]) + offset) +
-                                            "/" + (Convert.ToInt32(ad[2]) + offset) + " ";
+                                            (Convert.ToInt32(ad[2]) + offset) +
+                                            "/" + (Convert.ToInt32(ad[1]) + offset) + " ";
                                 }
                                 fList.Add(st);
                                 break;
