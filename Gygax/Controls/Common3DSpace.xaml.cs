@@ -77,8 +77,11 @@ namespace GygaxVisu.Controls
                     {
                         model.Attach(Viewport.RenderHost);
                     }
-                    
+
+                    model.Visibility = Visibility.Hidden;
+
                     Viewport.Items.Add(model);
+                    
                 }
             }
 

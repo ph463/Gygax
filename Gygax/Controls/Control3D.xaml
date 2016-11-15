@@ -12,7 +12,7 @@
              mc:Ignorable="d"
              >
     <Grid>
-        <Label Content="loading..." HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="LoadingAnimation"></Label>
+        <Label Content="loading..." HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="LoadingAnimation"/>
         <hx:Viewport3DX
             x:Name="Viewport"
             TextBrush="Black"
@@ -22,8 +22,8 @@
             Visibility="Hidden"
             MouseDown="Viewport_OnMouseDown"
             ShowViewCube="False"
-            >
-        </hx:Viewport3DX>
+            />
+        
         <!--
         <Label>
             <Label.ContextMenu>
