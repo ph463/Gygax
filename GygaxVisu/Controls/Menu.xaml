@@ -11,7 +11,7 @@
         <Menu IsMainMenu="True">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open file" Click="OpenFile_OnClick" />
-                <MenuItem Header="_Open local Camera" Name="LocalCamera" Initialized="FrameworkElement_OnInitialized" IsEnabled="False"/>
+                <MenuItem Header="_Open camera" Name="Camera" Initialized="FrameworkElement_OnInitialized" IsEnabled="False"/>
                 <Separator/>
                 <MenuItem Header="_Save all" IsEnabled="False"/>
                 <Separator/>

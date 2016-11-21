@@ -1,0 +1,30 @@
+﻿<Window x:Class="GygaxVisu.Dialogs.NetworkCameraDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GygaxVisu.Dialogs"
+        mc:Ignorable="d"
+        Title="NetworkCameraDialog" Height="145.795" Width="217.29">
+    <Grid Margin="0,0,-6.6,-20.2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="IP Address"/>
+        <StackPanel Grid.Row="1" Margin="8" Orientation="Horizontal" HorizontalAlignment="Left">
+            <TextBox Width="30" Name="IpBlock1" PreviewTextInput="NumberValidationTextBox" MaxLength="3"/>
+            <Label Content="."/>
+            <TextBox Width="30" Name="IpBlock2" PreviewTextInput="NumberValidationTextBox" MaxLength="3"></TextBox>
+            <Label Content="."/>
+            <TextBox Width="30" Name="IpBlock3" PreviewTextInput="NumberValidationTextBox" MaxLength="3"></TextBox>
+            <Label Content="."/>
+            <TextBox Width="30" Name="IpBlock4" PreviewTextInput="NumberValidationTextBox" MaxLength="3"></TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="8" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="ok" Click="ButtonOk_OnClick" Width="60" Margin="0,0,20,0"></Button>
+            <Button Content="cancel" Click="ButtonCancle_OnClick" Width="60" Margin="0,0,5,0"></Button>
+        </StackPanel>
+    </Grid>
+</Window>
