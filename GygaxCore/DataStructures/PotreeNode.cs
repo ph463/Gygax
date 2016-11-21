@@ -5,7 +5,7 @@ using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using PclWrapper;
 
-namespace GygaxCore.DataStructures.DataStructures.DataStructures
+namespace GygaxCore.DataStructures
 {
     /// <summary>
     /// https://github.com/potree/potree/blob/master/docs/file_format.md

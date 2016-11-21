@@ -10,22 +10,46 @@ using DirectShowLib;
 using Emgu.CV;
 using GygaxCore.DataStructures;
 using GygaxCore.Interfaces;
+using HelixToolkit.Wpf.SharpDX.Core;
 
 namespace GygaxCore.Devices
 {
     public class UsbCamera : Streamable, ICamera
     {
-        private readonly Capture _capture = null;
-
+        private Capture _capture = null;
+        
         private bool _stop;
+
+        public string Location { get; private set; }
+
+        private static List<int> _openCameras;
+        private int _cameraIndex;
 
         public UsbCamera(int cameraIndex)
         {
+            if (_openCameras == null)
+                _openCameras = new ExposedArrayList<int>();
+
+            _cameraIndex = cameraIndex;
+
+            _openCameras.Add(_cameraIndex);
+
             _capture = new Capture(cameraIndex);
 
             var thread = new Thread(WorkThreadFunction);
-            thread.Name = "UsbCamera " + cameraIndex;
+
+            Location = "UsbCamera " + cameraIndex;
+
+            thread.Name = Location;
             thread.Start();
+        }
+
+        public static bool IsCameraOpened(int cameraIndex)
+        {
+            if (_openCameras != null && _openCameras.Contains(cameraIndex))
+                return true;
+
+            return false;
         }
 
         public static List<string> GetDevices()
@@ -46,8 +70,18 @@ namespace GygaxCore.Devices
 
             while (!_stop)
             {
-                CvSource = _capture.QueryFrame();
+                try
+                {
+                    CvSource = _capture.QueryFrame();
+                }
+                catch (Exception)
+                {
+                }
             }
+            
+             _capture.Dispose();
+
+            _openCameras.Remove(_cameraIndex);
 
         }
     }

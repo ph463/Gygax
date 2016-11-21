@@ -20,5 +20,9 @@ namespace GygaxCore.Interfaces
         object Data { get; set; }
 
         void Close();
+
+        string Location { get; }
+
+        string Name { get; }
     }
 }

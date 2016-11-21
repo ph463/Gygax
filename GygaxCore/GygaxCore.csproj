@@ -100,6 +100,10 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.3.11\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.1.1.2349.61993\lib\NET40\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -158,12 +162,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataStructures\CameraPosition.cs" />
+    <Compile Include="DataStructures\GygaxVideo.cs" />
     <Compile Include="Processors\MyMethod.cs" />
     <Compile Include="Processors\Threshold.cs" />
     <Compile Include="Processors\EdgeDetector.cs" />
     <Compile Include="Tools\CoordinateSystem.cs" />
     <Compile Include="DataStructures\PotreeNode.cs" />
-    <Compile Include="Loader\SceneScannerPositionLoader.cs" />
+    <Compile Include="DataStructures\SceneScannerPosition.cs" />
     <Compile Include="Ifc\IfcEngine.cs" />
     <Compile Include="Ifc\IfcTree.cs" />
     <Compile Include="Ifc\IfcWrapper.cs" />
@@ -175,7 +180,7 @@
     <Compile Include="Interfaces\IProcessor.cs" />
     <Compile Include="Tools\LUT.cs" />
     <Compile Include="DataStructures\NViewMatchLoader.cs" />
-    <Compile Include="Loader\PotreeLoader.cs" />
+    <Compile Include="DataStructures\Potree.cs" />
     <Compile Include="DataStructures\Pointcloud.cs" />
     <Compile Include="DataStructures\Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -184,12 +189,10 @@
     <Compile Include="DataStructures\Video.cs" />
     <Compile Include="Devices\UsbCamera.cs" />
     <Compile Include="DataStructures\VideoFromFolder.cs" />
-    <Compile Include="Loader\VsfmReconstruction.cs" />
+    <Compile Include="DataStructures\VsfmReconstruction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram4.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

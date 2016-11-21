@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using GygaxCore.Interfaces;
-using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
+using NLog;
 using PclWrapper;
 using SharpDX;
 using IImage = Emgu.CV.IImage;
@@ -21,6 +15,12 @@ namespace GygaxCore.DataStructures
     public class Pointcloud : PCD, IStreamable
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public string Location { get; protected set; }
+
+        public string Name { get; protected set; }
 
         private bool _stop;
 

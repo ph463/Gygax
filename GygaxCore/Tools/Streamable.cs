@@ -11,13 +11,20 @@ using Emgu.CV.Structure;
 using GygaxCore.Interfaces;
 using IImage = Emgu.CV.IImage;
 using Size = System.Drawing.Size;
+using NLog;
 
 namespace GygaxCore.DataStructures
 {
     public class Streamable : IStreamable
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public string Location { get; protected set; }
+
+        public string Name { get; protected set; }
+
         private object _data;
         public object Data
         {

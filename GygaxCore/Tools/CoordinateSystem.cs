@@ -222,12 +222,17 @@ namespace GygaxCore.DataStructures
             }
         }
         
-        public static Matrix3D OpenTransformation(Uri filename)
+        public static Matrix3D OpenTransformation(string filename)
         {
-            if (!File.Exists(filename.LocalPath))
+            if (!File.Exists(filename))
                 return Matrix3D.Identity;
 
-            StreamReader sr = new StreamReader(filename.LocalPath, ASCIIEncoding.ASCII);
+            var fileUri = new Uri(filename);
+
+            if (!File.Exists(fileUri.LocalPath))
+                return Matrix3D.Identity;
+
+            StreamReader sr = new StreamReader(fileUri.LocalPath, ASCIIEncoding.ASCII);
 
             var s = Array.ConvertAll(sr.ReadLine().Trim().Split(','), double.Parse);
 
@@ -278,11 +283,11 @@ namespace GygaxCore.DataStructures
 
         }
 
-        //public void SaveTransform(string filename)
+        //public void SaveTransform(string fileUri)
         //{
         //    const string separator = ",";
 
-        //    using (StreamWriter writer = new StreamWriter(filename))
+        //    using (StreamWriter writer = new StreamWriter(fileUri))
         //    {
         //        writer.WriteLine(
         //            RotationMatrix.M11 + separator +
@@ -302,9 +307,9 @@ namespace GygaxCore.DataStructures
         //    }
         //}
 
-        //public void LoadTransform(string filename)
+        //public void LoadTransform(string fileUri)
         //{
-        //    using (TextFieldParser parser = new TextFieldParser(filename))
+        //    using (TextFieldParser parser = new TextFieldParser(fileUri))
         //    {
         //        parser.TextFieldType = FieldType.Delimited;
         //        parser.SetDelimiters(",");

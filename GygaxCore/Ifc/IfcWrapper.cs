@@ -2,11 +2,13 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Xml;
 using GygaxCore.Interfaces;
 using HelixToolkit.Wpf.SharpDX;
+using NLog;
 using SharpDX;
 using SharpDX.Direct3D11;
 using IImage = Emgu.CV.IImage;
@@ -288,53 +290,41 @@ namespace GygaxCore.Ifc
         Vector3 center = new Vector3();
         float size = 0;
 
-        public TreeNode<TreeElement> Tree;
-        public string IfcFile;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public string Location { get; private set; }
+
+        public string Name { get; private set; }
+
+        public TreeNode<TreeElement> Tree { get; private set; }
 
         public object Data { get; set; }
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        public IfcViewerWrapper()
+
+        public IfcViewerWrapper(string sPath)
         {
-            // default material
-            //_mtrlDefault = new Material();
-            //_mtrlDefault.DiffuseColor = _mtrlDefault.AmbientColor = _mtrlDefault.SpecularColor =
-            //            new ColorValue(0.1f, 0.1f, 0.2f, 1.0f);
-            //_mtrlDefault.EmissiveColor = new ColorValue(0.1f, 0.4f, 0.02f, 0.5f);
-            //_mtrlDefault.SpecularSharpness = 0.5f;
+            Location = sPath;
+            Name = "Ifc File" + Path.GetFileName(sPath).Split('.').First();
 
-            //// black material
-            //_mtrlBlack = new Material();
-            //_mtrlBlack.DiffuseColor = _mtrlBlack.AmbientColor = _mtrlBlack.SpecularColor =
-            //            new ColorValue(0.0f, 0.0f, 0.0f, 1.0f);
-            //_mtrlBlack.EmissiveColor = new ColorValue(0.0f, 0.0f, 0.0f, 0.5f);
-            //_mtrlBlack.SpecularSharpness = 0.5f;
+            logger.Info("Loading ifc file " + Location);
 
-            //// red material
-            //_mtrlRed = new Material();
-            //_mtrlRed.DiffuseColor = _mtrlRed.AmbientColor = _mtrlRed.SpecularColor =
-            //            new ColorValue(0.4f, 0.05f, 0.05f, 1.0f);
-            //_mtrlRed.EmissiveColor = new ColorValue(0.1f, 0.02f, 0.02f, 0.5f);
-            //_mtrlRed.SpecularSharpness = 0.5f;
+            var thread = new Thread(LoadThreadFunction)
+            {
+                Name = "Ifc loader " + Path.GetFileName(Location)
+            };
+            thread.Start();
         }
 
-        // -------------------------------------------------------------------
-        // Private Methods 
-
-        public bool ParseIfcFile(string sPath)
+        private void LoadThreadFunction()
         {
-            if (true == File.Exists(sPath))
+            if (true == File.Exists(Location))
             {
                 //int ifcModel = IfcEngine.x86.sdaiOpenModelBN(0, sPath, "IFC2X3_TC1.exp");
                 //Int64 ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, sPath,"IFC2X3_TC1.exp");
 
-                //var path = System.Text.Encoding.UTF8.GetBytes(sPath);
-                IfcFile = sPath;
-                var path = System.Text.Encoding.UTF8.GetBytes(sPath);
+                var path = System.Text.Encoding.UTF8.GetBytes(Location);
 
-                Int64 ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, sPath, "Ifc/IFC2X3_TC1.exp");
+                Int64 ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, Location, "Ifc/IFC2X3_TC1.exp");
 
                 //Int64 ifcModel = IfcEngine.x64.sdaiCreateModelBNUnicode(0, System.Text.Encoding.UTF8.GetBytes("model.ifc"),
                 //    System.Text.Encoding.UTF8.GetBytes("IFC2X3_TC1.exp"));
@@ -362,7 +352,7 @@ namespace GygaxCore.Ifc
                         if (s.Contains("IFC4") == true)
                         {
                             IfcEngine.x64.sdaiCloseModel(ifcModel);
-                            ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, sPath, "IFC4.exp");
+                            ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, Location, "IFC4.exp");
 
                             if (ifcModel != 0)
                                 textReader = new XmlTextReader(xmlSettings_IFC4);
@@ -370,7 +360,10 @@ namespace GygaxCore.Ifc
                     }
 
                     if (textReader == null)
-                        return false;
+                    {
+                        logger.Info("Problem while loading ifc file");
+                        return;
+                    }
 
                     // if node type us an attribute
                     while (textReader.Read())
@@ -470,13 +463,15 @@ namespace GygaxCore.Ifc
 
                     this.Data = this;
 
-                    return true;
+                    logger.Info("Ifc file loaded");
+                    return;
                 }
             }
 
-            return false;
+            logger.Info("Problem while loading ifc file");
+            return;
         }
-        
+
         public static string GetValidPathName(string path)
         {
             return Path.GetInvalidFileNameChars().Aggregate(path, (current, c) => current.Replace(c.ToString(), string.Empty));
@@ -1378,25 +1373,25 @@ namespace GygaxCore.Ifc
 
 
         //}
-        public bool OpenIFCFile(string ifcFilePath)
-        {
-            Reset();
+        //public bool OpenIFCFile(string ifcFilePath)
+        //{
+        //    Reset();
 
-            RootIfcItem = null;
+        //    RootIfcItem = null;
 
-            if (ParseIfcFile(ifcFilePath) == true)
-            {
-                InitalizeDeviceBuffer();
+        //    if (ParseIfcFile(ifcFilePath) == true)
+        //    {
+        //        InitalizeDeviceBuffer();
 
-                this._destControl?.Refresh();
+        //        this._destControl.Refresh();
 
-                return true;
-            }
+        //        return true;
+        //    }
 
-            return false;
+        //    return false;
 
 
-        }
+        //}
         //public void Redraw()
         //{
         //    this.Render();

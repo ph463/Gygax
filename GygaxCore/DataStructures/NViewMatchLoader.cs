@@ -234,7 +234,7 @@ namespace GygaxCore.DataStructures
         public string TransformationFilename;
         public int Index;
 
-        public Matrix3D Transform => CoordinateSystem.OpenTransformation(new Uri(TransformationFilename));
+        public Matrix3D Transform => CoordinateSystem.OpenTransformation(TransformationFilename);
     }
 
     public struct Patch

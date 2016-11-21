@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using System.Xml.Serialization;
 using Emgu.CV;
@@ -43,7 +38,7 @@ namespace GygaxCore.DataStructures
 
                 Basis = new Matrix3x3
                 {
-                    Row1 = Vector3.Normalize(Rotate(_orientation, new Vector3D(1,0,0)).ToVector3()),
+                    Row1 = Vector3.Normalize(Rotate(_orientation, new Vector3D(1, 0, 0)).ToVector3()),
                     Row2 = Vector3.Normalize(Rotate(_orientation, new Vector3D(0, 1, 0)).ToVector3()),
                     Row3 = Vector3.Normalize(Rotate(_orientation, new Vector3D(0, 0, 1)).ToVector3())
                 };
@@ -94,8 +89,8 @@ namespace GygaxCore.DataStructures
         public static Vector3D GetCornerPointToAxis(CameraPosition cameraPosition, Quaternion axis, Direction direction)
         {
             // Orientation in Viewing direction
-            var a1 = cameraPosition.Image.Width / 2;
-            var a2 = cameraPosition.Image.Height / 2;
+            var a1 = cameraPosition.Width / 2;
+            var a2 = cameraPosition.Height / 2;
             var a3 = cameraPosition.FocalLength;
 
             var angleY = Math.Atan(a1 / a3);

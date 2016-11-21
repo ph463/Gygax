@@ -18,10 +18,10 @@ namespace GygaxCore.Ifc
 
         enum HeaderItem
         {
-	        Description,
-	        ImplementationLevel,
-	        Name,
-	        TimeStamp,
+            Description,
+            ImplementationLevel,
+            Name,
+            TimeStamp,
             Author,
             Organization,
             PreprocessorVersion,
@@ -53,10 +53,11 @@ namespace GygaxCore.Ifc
             IfcEngine.x64.GetSPFFHeaderItem(_ifcModel, (long) headerItem, i++, IfcEngine.x64.sdaiSTRING, out ptr);
 
             return new TreeElement
-                {
-                    Key = key,
-                    Value = Marshal.PtrToStringAnsi(ptr)
-                };
+            {
+                Key = key,
+                Value = Marshal.PtrToStringAnsi(ptr),
+                //GlobalId = getGlobalId((long) headerItem)
+            };
         }
 
         private TreeNode<TreeElement> ReadMultipleValues(HeaderItem headerItem, string key, string nodeName)
@@ -143,7 +144,8 @@ namespace GygaxCore.Ifc
             for (int iDecomposition = 0; iDecomposition < iDecompositionsCount; iDecomposition++)
             {
                 long iDecompositionInstance = 0;
-                IfcEngine.x64.engiGetAggrElement(decompositionInstance.ToInt64(), iDecomposition, IfcEngine.x64.sdaiINSTANCE, out iDecompositionInstance);
+                IfcEngine.x64.engiGetAggrElement(decompositionInstance.ToInt64(), iDecomposition,
+                    IfcEngine.x64.sdaiINSTANCE, out iDecompositionInstance);
 
                 if (!IsInstanceOf(iDecompositionInstance, "IFCRELAGGREGATES"))
                 {
@@ -151,13 +153,15 @@ namespace GygaxCore.Ifc
                 }
 
                 IntPtr objectInstances;
-                IfcEngine.x64.sdaiGetAttrBN(iDecompositionInstance, "RelatedObjects", IfcEngine.x64.sdaiAGGR, out objectInstances);
+                IfcEngine.x64.sdaiGetAttrBN(iDecompositionInstance, "RelatedObjects", IfcEngine.x64.sdaiAGGR,
+                    out objectInstances);
 
                 long iObjectsCount = IfcEngine.x64.sdaiGetMemberCount(objectInstances.ToInt64());
                 for (int iObject = 0; iObject < iObjectsCount; iObject++)
                 {
                     long iObjectInstance = 0;
-                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE, out iObjectInstance);
+                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE,
+                        out iObjectInstance);
 
                     if (!IsInstanceOf(iObjectInstance, strEntityName))
                     {
@@ -168,23 +172,40 @@ namespace GygaxCore.Ifc
 
                     switch (strEntityName)
                     {
+                        default:
+                        {
+                            Console.WriteLine("0");
+                        }
+                            break;
                         case "IfcSite":
-                            {
-                                GetTreeItems(iObjectInstance, "IfcBuilding", ref child);
-                            }
+                        {
+                            GetTreeItems(iObjectInstance, "IfcBuilding", ref child);
+                        }
                             break;
 
                         case "IfcBuilding":
-                            {
-                                GetTreeItems(iObjectInstance, "IfcBuildingStorey", ref child);
-                            }
+                        {
+                            GetTreeItems(iObjectInstance, "IfcBuildingStorey", ref child);
+                        }
                             break;
 
                         case "IfcBuildingStorey":
-                            {
+                        {
+                            
+                        //    long imDecompositionInstance = 0;
+                        //    IfcEngine.x64.engiGetAggrElement(iObjectInstance, iDecomposition,
+                        //        IfcEngine.x64.sdaiINSTANCE, out imDecompositionInstance);
+                        //    GetTreeItems(imDecompositionInstance, "IfcAssembly", ref child);
+                        //    }
+                        //    break;
+
+                        //case "IfcAssembly":
+                        //    {
                                 AddElementTreeItems(iObjectInstance, ref child);
+
                             }
                             break;
+                            
                     }
                 }
             }
@@ -207,14 +228,20 @@ namespace GygaxCore.Ifc
 
             string strDescription = Marshal.PtrToStringAnsi(description);
 
+            IntPtr gvalue = IntPtr.Zero;
+            IfcEngine.x64.sdaiGetAttrBN(instance, "GlobalId", IfcEngine.x64.sdaiSTRING, out gvalue);
+
+            string globalId = Marshal.PtrToStringAnsi((IntPtr) gvalue);
+
             string strItemText = "'" + (string.IsNullOrEmpty(strName) ? "<name>" : strName) +
-                    "', '" + (string.IsNullOrEmpty(strDescription) ? "<description>" : strDescription) +
-                    "' (" + strIfcType + ")";
+                                 "', '" + (string.IsNullOrEmpty(strDescription) ? "<description>" : strDescription) +
+                                 "' (" + strIfcType + ")";
 
             return new TreeElement()
             {
                 Key = strName,
-                Value = strDescription + " (" + strIfcType + ")"
+                Value = strDescription + " (" + strIfcType + ")",
+                GlobalId = globalId
             };
         }
 
@@ -227,11 +254,12 @@ namespace GygaxCore.Ifc
 
             return false;
         }
-        
+
         private void AddElementTreeItems(long iParentInstance, ref TreeNode<TreeElement> tree)
         {
             IntPtr decompositionInstance;
-            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "IsDecomposedBy", IfcEngine.x64.sdaiAGGR, out decompositionInstance);
+            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "IsDecomposedBy", IfcEngine.x64.sdaiAGGR,
+                out decompositionInstance);
 
             if (decompositionInstance == IntPtr.Zero)
             {
@@ -242,7 +270,8 @@ namespace GygaxCore.Ifc
             for (int iDecomposition = 0; iDecomposition < iDecompositionsCount; iDecomposition++)
             {
                 long iDecompositionInstance = 0;
-                IfcEngine.x64.engiGetAggrElement(decompositionInstance.ToInt64(), iDecomposition, IfcEngine.x64.sdaiINSTANCE, out iDecompositionInstance);
+                IfcEngine.x64.engiGetAggrElement(decompositionInstance.ToInt64(), iDecomposition,
+                    IfcEngine.x64.sdaiINSTANCE, out iDecompositionInstance);
 
                 if (!IsInstanceOf(iDecompositionInstance, "IFCRELAGGREGATES"))
                 {
@@ -250,13 +279,16 @@ namespace GygaxCore.Ifc
                 }
 
                 IntPtr objectInstances;
-                IfcEngine.x64.sdaiGetAttrBN(iDecompositionInstance, "RelatedObjects", IfcEngine.x64.sdaiAGGR, out objectInstances);
+                IfcEngine.x64.sdaiGetAttrBN(iDecompositionInstance, "RelatedObjects", IfcEngine.x64.sdaiAGGR,
+                    out objectInstances);
 
                 long iObjectsCount = IfcEngine.x64.sdaiGetMemberCount(objectInstances.ToInt64());
+                
                 for (int iObject = 0; iObject < iObjectsCount; iObject++)
                 {
                     long iObjectInstance = 0;
-                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE, out iObjectInstance);
+                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE,
+                        out iObjectInstance);
 
                     tree.AddChild(CreateTreeItem(iObjectInstance));
                 }
@@ -264,7 +296,8 @@ namespace GygaxCore.Ifc
 
             // check for elements
             IntPtr elementsInstance;
-            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "ContainsElements", IfcEngine.x64.sdaiAGGR, out elementsInstance);
+            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "ContainsElements", IfcEngine.x64.sdaiAGGR,
+                out elementsInstance);
 
             if (elementsInstance == IntPtr.Zero)
             {
@@ -275,26 +308,39 @@ namespace GygaxCore.Ifc
             for (int iElement = 0; iElement < iElementsCount; iElement++)
             {
                 long iElementInstance = 0;
-                IfcEngine.x64.engiGetAggrElement(elementsInstance.ToInt64(), iElement, IfcEngine.x64.sdaiINSTANCE, out iElementInstance);
+                IfcEngine.x64.engiGetAggrElement(elementsInstance.ToInt64(), iElement, IfcEngine.x64.sdaiINSTANCE,
+                    out iElementInstance);
 
                 if (!IsInstanceOf(iElementInstance, "IFCRELCONTAINEDINSPATIALSTRUCTURE"))
                 {
                     continue;
                 }
+                
+                //IntPtr objectInstances2;
+                //IfcEngine.x64.sdaiGetAttrBN(iElementInstance, "IsDecomposedBy", IfcEngine.x64.sdaiAGGR,
+                //out objectInstances2);
+
+                //long iObjectsCount2 = IfcEngine.x64.sdaiGetMemberCount(objectInstances2.ToInt64());
 
                 IntPtr objectInstances;
-                IfcEngine.x64.sdaiGetAttrBN(iElementInstance, "RelatedElements", IfcEngine.x64.sdaiAGGR, out objectInstances);
+                IfcEngine.x64.sdaiGetAttrBN(iElementInstance, "RelatedElements", IfcEngine.x64.sdaiAGGR,
+                    out objectInstances);
 
                 long iObjectsCount = IfcEngine.x64.sdaiGetMemberCount(objectInstances.ToInt64());
                 for (int iObject = 0; iObject < iObjectsCount; iObject++)
                 {
                     long iObjectInstance = 0;
-                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE, out iObjectInstance);
+                    IfcEngine.x64.engiGetAggrElement(objectInstances.ToInt64(), iObject, IfcEngine.x64.sdaiINSTANCE,
+                        out iObjectInstance);
 
                     var child = tree.AddChild(CreateTreeItem(iObjectInstance));
+                    AddElementTreeItems(iObjectInstance, ref child);
+
 
                     IntPtr definedByInstances;
-                    IfcEngine.x64.sdaiGetAttrBN(iObjectInstance, "IsDefinedBy", IfcEngine.x64.sdaiAGGR, out definedByInstances);
+                    IfcEngine.x64.sdaiGetAttrBN(iObjectInstance, "IsDefinedBy", IfcEngine.x64.sdaiAGGR,
+                        out definedByInstances);
+
 
                     if (definedByInstances == IntPtr.Zero)
                     {
@@ -305,17 +351,18 @@ namespace GygaxCore.Ifc
                     for (int iDefinedBy = 0; iDefinedBy < iDefinedByCount; iDefinedBy++)
                     {
                         long iDefinedByInstance = 0;
-                        IfcEngine.x64.engiGetAggrElement(definedByInstances.ToInt64(), iDefinedBy, IfcEngine.x64.sdaiINSTANCE, out iDefinedByInstance);
+                        IfcEngine.x64.engiGetAggrElement(definedByInstances.ToInt64(), iDefinedBy,
+                            IfcEngine.x64.sdaiINSTANCE, out iDefinedByInstance);
 
                         if (IsInstanceOf(iDefinedByInstance, "IFCRELDEFINESBYPROPERTIES"))
                         {
-                            AddPropertyTreeItems(iDefinedByInstance,ref child);
+                            AddPropertyTreeItems(iDefinedByInstance, ref child);
                         }
                         else
                         {
                             if (IsInstanceOf(iDefinedByInstance, "IFCRELDEFINESBYTYPE"))
                             {
-                                
+
                             }
                         }
                     }
@@ -323,18 +370,20 @@ namespace GygaxCore.Ifc
             }
         }
 
-        private void AddPropertyTreeItems(long iParentInstance, ref TreeNode<TreeElement> tree )
+        private void AddPropertyTreeItems(long iParentInstance, ref TreeNode<TreeElement> tree)
         {
             IntPtr propertyInstances;
-            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "RelatingPropertyDefinition", IfcEngine.x64.sdaiINSTANCE, out propertyInstances);
+            IfcEngine.x64.sdaiGetAttrBN(iParentInstance, "RelatingPropertyDefinition", IfcEngine.x64.sdaiINSTANCE,
+                out propertyInstances);
 
             if (IsInstanceOf(propertyInstances.ToInt64(), "IFCELEMENTQUANTITY"))
             {
                 var child = tree.AddChild(CreateTreeItem(propertyInstances.ToInt64()));
-                
+
                 // check for quantity
                 IntPtr quantitiesInstance;
-                IfcEngine.x64.sdaiGetAttrBN(propertyInstances.ToInt64(), "Quantities", IfcEngine.x64.sdaiAGGR, out quantitiesInstance);
+                IfcEngine.x64.sdaiGetAttrBN(propertyInstances.ToInt64(), "Quantities", IfcEngine.x64.sdaiAGGR,
+                    out quantitiesInstance);
 
                 if (quantitiesInstance == IntPtr.Zero)
                 {
@@ -345,7 +394,8 @@ namespace GygaxCore.Ifc
                 for (int iQuantity = 0; iQuantity < iQuantitiesCount; iQuantity++)
                 {
                     long iQuantityInstance = 0;
-                    IfcEngine.x64.engiGetAggrElement(quantitiesInstance.ToInt64(), iQuantity, IfcEngine.x64.sdaiINSTANCE, out iQuantityInstance);
+                    IfcEngine.x64.engiGetAggrElement(quantitiesInstance.ToInt64(), iQuantity, IfcEngine.x64.sdaiINSTANCE,
+                        out iQuantityInstance);
 
                     if (IsInstanceOf(iQuantityInstance, "IFCQUANTITYLENGTH"))
                         child.AddChild(CreatePropertyTreeItem(iQuantityInstance, "IFCQUANTITYLENGTH"));
@@ -359,6 +409,8 @@ namespace GygaxCore.Ifc
                         child.AddChild(CreatePropertyTreeItem(iQuantityInstance, "IFCQUANTITYWEIGTH"));
                     else if (IsInstanceOf(iQuantityInstance, "IFCQUANTITYTIME"))
                         child.AddChild(CreatePropertyTreeItem(iQuantityInstance, "IFCQUANTITYTIME"));
+                    else
+                        throw new NotImplementedException();
                 }
             }
             else
@@ -369,7 +421,8 @@ namespace GygaxCore.Ifc
 
                     // check for quantity
                     IntPtr propertiesInstance;
-                    IfcEngine.x64.sdaiGetAttrBN(propertyInstances.ToInt64(), "HasProperties", IfcEngine.x64.sdaiAGGR, out propertiesInstance);
+                    IfcEngine.x64.sdaiGetAttrBN(propertyInstances.ToInt64(), "HasProperties", IfcEngine.x64.sdaiAGGR,
+                        out propertiesInstance);
 
                     if (propertiesInstance == IntPtr.Zero)
                     {
@@ -380,7 +433,8 @@ namespace GygaxCore.Ifc
                     for (int iProperty = 0; iProperty < iPropertiesCount; iProperty++)
                     {
                         long iPropertyInstance = 0;
-                        IfcEngine.x64.engiGetAggrElement(propertiesInstance.ToInt64(), iProperty, IfcEngine.x64.sdaiINSTANCE, out iPropertyInstance);
+                        IfcEngine.x64.engiGetAggrElement(propertiesInstance.ToInt64(), iProperty,
+                            IfcEngine.x64.sdaiINSTANCE, out iPropertyInstance);
 
                         if (!IsInstanceOf(iPropertyInstance, "IFCPROPERTYSINGLEVALUE"))
                             continue;
@@ -406,7 +460,8 @@ namespace GygaxCore.Ifc
             for (int iStyle = 0; iStyle < iStylesCount; iStyle++)
             {
                 long iStyleInstance = 0;
-                IfcEngine.x64.engiGetAggrElement(stylesInstance.ToInt64(), iStyle, IfcEngine.x64.sdaiINSTANCE, out iStyleInstance);
+                IfcEngine.x64.engiGetAggrElement(stylesInstance.ToInt64(), iStyle, IfcEngine.x64.sdaiINSTANCE,
+                    out iStyleInstance);
 
                 if (iStyleInstance == 0)
                 {
@@ -414,7 +469,8 @@ namespace GygaxCore.Ifc
                 }
 
                 IntPtr surfaceColour;
-                IfcEngine.x64.sdaiGetAttrBN(iStyleInstance, "SurfaceColour", IfcEngine.x64.sdaiINSTANCE, out surfaceColour);
+                IfcEngine.x64.sdaiGetAttrBN(iStyleInstance, "SurfaceColour", IfcEngine.x64.sdaiINSTANCE,
+                    out surfaceColour);
 
                 if (surfaceColour == IntPtr.Zero)
                 {
@@ -422,15 +478,15 @@ namespace GygaxCore.Ifc
                 }
 
                 double R = 0;
-                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Red", IfcEngine.x64.sdaiREAL, out *(IntPtr*)&R);
+                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Red", IfcEngine.x64.sdaiREAL, out *(IntPtr*) &R);
 
                 double G = 0;
-                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Green", IfcEngine.x64.sdaiREAL, out *(IntPtr*)&G);
+                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Green", IfcEngine.x64.sdaiREAL, out *(IntPtr*) &G);
 
                 double B = 0;
-                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Blue", IfcEngine.x64.sdaiREAL, out *(IntPtr*)&B);
+                IfcEngine.x64.sdaiGetAttrBN(surfaceColour.ToInt32(), "Blue", IfcEngine.x64.sdaiREAL, out *(IntPtr*) &B);
 
-                returnValue = new Vector3((float)R, (float)G, (float)B);
+                returnValue = new Vector3((float) R, (float) G, (float) B);
             }
 
             return returnValue;
@@ -454,66 +510,66 @@ namespace GygaxCore.Ifc
             switch (strProperty)
             {
                 case "IFCQUANTITYLENGTH":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "LengthValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "LengthValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCQUANTITYAREA":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "AreaValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "AreaValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCQUANTITYVOLUME":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "VolumeValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "VolumeValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCQUANTITYCOUNT":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "CountValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "CountValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCQUANTITYWEIGTH":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "WeigthValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "WeigthValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCQUANTITYTIME":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "TimeValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "TimeValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 case "IFCPROPERTYSINGLEVALUE":
-                    {
-                        IntPtr value;
-                        IfcEngine.x64.sdaiGetAttrBN(instance, "NominalValue", IfcEngine.x64.sdaiSTRING, out value);
+                {
+                    IntPtr value;
+                    IfcEngine.x64.sdaiGetAttrBN(instance, "NominalValue", IfcEngine.x64.sdaiSTRING, out value);
 
-                        strValue = Marshal.PtrToStringAnsi(value);
-                    }
+                    strValue = Marshal.PtrToStringAnsi(value);
+                }
                     break;
 
                 default:
@@ -521,8 +577,8 @@ namespace GygaxCore.Ifc
             } // switch (strProperty)    
 
             string strItemText = "'" + (string.IsNullOrEmpty(strName) ? "<name>" : strName) +
-                    "' = '" + (string.IsNullOrEmpty(strValue) ? "<value>" : strValue) +
-                    "' (" + strIfcType + ")";
+                                 "' = '" + (string.IsNullOrEmpty(strValue) ? "<value>" : strValue) +
+                                 "' (" + strIfcType + ")";
 
             //if ((ifcParent != null) && (ifcParent.treeNode != null))
             //{
@@ -543,8 +599,19 @@ namespace GygaxCore.Ifc
 
             return new TreeElement()
             {
-                Key = strItemText
+                //Key = strItemText
+                Key = strName,
+                Value = strValue,
+                GlobalId = getGlobalId(instance)
             };
+        }
+
+        private string getGlobalId(long instance)
+        {
+            IntPtr gvalue = IntPtr.Zero;
+            IfcEngine.x64.sdaiGetAttrBN(instance, "GlobalId", IfcEngine.x64.sdaiSTRING, out gvalue);
+
+            return Marshal.PtrToStringAnsi((IntPtr)gvalue);
         }
     }
     
@@ -552,10 +619,12 @@ namespace GygaxCore.Ifc
     {
         public string Key;
         public string Value;
+        public string GlobalId;
         public Vector3 Color;
+
         public override string ToString()
         {
-            if(Value == null || Value.Equals(""))
+            if (Value == null || Value.Equals(""))
                 return Key;
 
             return Key + " = " + Value;
