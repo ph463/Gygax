@@ -54,7 +54,7 @@
       <Project>{fde7ee57-0863-4377-93f7-7b79b3fdb78a}</Project>
       <Name>GygaxCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Gygax\GygaxVisu.csproj">
+    <ProjectReference Include="..\GygaxVisu\GygaxVisu.csproj">
       <Project>{15f9221c-abda-4a84-9150-007cb07265ba}</Project>
       <Name>GygaxVisu</Name>
     </ProjectReference>

@@ -17,6 +17,7 @@ using GygaxCore;
 using GygaxCore.DataStructures;
 using GygaxCore.Devices;
 using GygaxCore.Ifc;
+using GygaxVisu.Method;
 using Image = GygaxCore.DataStructures.Image;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
@@ -151,6 +152,106 @@ namespace GygaxVisu.Controls
         private void ClearWorkspace_OnClick(object sender, RoutedEventArgs e)
         {
             _viewModel.Clear();
+        }
+
+
+        private void Correction_OnClick(object sender, RoutedEventArgs e)
+        {
+            var cs = new CoordinateSystem();
+
+            cs.LoadCorrespondences(@"C:\Users\Philipp\Desktop\Correspondences.csv");
+
+            //cs.AddTestelements();
+            cs.CalculateHomography();
+
+            //cs.SaveTransform(@"C:\Users\Philipp\Desktop\Transform.csv");
+        }
+
+        private void ColumnIcp_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.Icp(true);
+        }
+
+        private void ColumnNoIcp_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.Icp(false);
+        }
+
+        private void CalculateTexture_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.CalculateTexture();
+        }
+
+        private void GenerateAllTextures_OnClick(object sender, RoutedEventArgs e)
+        {
+            //var m = new Methods();
+            //m.GenerateAllTextures();
+
+            //var res = new OpenFileDialog
+            //{
+            //    Filter = "NView Match|*.nvm;..."
+            //};
+
+            //if (!(res.ShowDialog() == DialogResult.OK))
+            //{
+            //    return;
+            //}
+
+            //var res2 = new OpenFileDialog
+            //{
+            //    Filter = "Ifc Files|*.ifc;..."
+            //};
+
+            //if (!(res2.ShowDialog() == DialogResult.OK))
+            //{
+            //    return;
+            //}
+
+            //FolderBrowserDialog res3 = new FolderBrowserDialog();
+
+            //if (!(res3.ShowDialog() == DialogResult.OK))
+            //{
+            //    return;
+            //}
+
+            //Methods.CalculateOneTexture(res.FileName, res2.FileName, res3.SelectedPath + @"\");
+            Methods.CalculateOneTexture(@"Z:\06. Data\Bridges\Philipp\Bridge 1\JustImages\sparse.nvm", @"Z:\06. Data\Bridges\Philipp\Bridge 1\IFC\Bridge1_v3.ifc", @"Z:\06. Data\Bridges\Philipp\Bridge 1\Textures\");
+        }
+
+        private void BuildMasks_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.CalculateTexture(false, true);
+        }
+
+        private void ExtractImagePoints_OnClick(object sender, RoutedEventArgs e)
+        {
+            var m = new Methods();
+            m.ExtractFromImageCoordinates();
+        }
+
+        private void DrawTextures_OnClick(object sender, RoutedEventArgs e)
+        {
+            var res = new OpenFileDialog
+            {
+                Filter = "Bin file|*.bin;..."
+            };
+
+            if (!(res.ShowDialog() == DialogResult.OK))
+            {
+                return;
+            }
+
+            var m = new Methods();
+            m.DrawTexture(res.FileName);
+        }
+
+        private void ObjectExport_OnClick(object sender, RoutedEventArgs e)
+        {
+            Methods.ExportToObject();
         }
     }
 }

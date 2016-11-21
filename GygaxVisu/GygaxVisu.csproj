@@ -213,6 +213,13 @@
     <Compile Include="Helpers\PrimitiveBuilder.cs" />
     <Compile Include="Helpers\ViewModel.cs" />
     <Compile Include="Helpers\ViewportHelper.cs" />
+    <Compile Include="Method\Animation.cs" />
+    <Compile Include="Method\Methods.cs" />
+    <Compile Include="Method\MyProcessor.cs" />
+    <Compile Include="Method\MyProcessor2.cs" />
+    <Compile Include="Method\ObjHandler.cs" />
+    <Compile Include="Method\PlaneReconstructor.cs" />
+    <Compile Include="Method\ScannerOverlay.cs" />
     <Compile Include="Method\Triangle.cs" />
     <Compile Include="Method\UvMapper.cs" />
     <Compile Include="Visualizer\IfcVisualizer.cs" />
