@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +18,13 @@ using GygaxCore;
 using GygaxCore.DataStructures;
 using GygaxCore.Devices;
 using GygaxCore.Ifc;
+using GygaxVisu.Dialogs;
 using Image = GygaxCore.DataStructures.Image;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
 using GygaxVisu.Visualizer;
 using HelixToolkit.Wpf.SharpDX;
+using NLog;
 using PclWrapper;
 using SharpDX;
 
@@ -32,7 +35,10 @@ namespace GygaxVisu.Controls
     /// </summary>
     public partial class Menu : UserControl
     {
-        private ViewModel _viewModel {get { return (ViewModel)this.DataContext; } }
+        private ViewModel _viewModel
+        {
+            get { return (ViewModel) this.DataContext; }
+        }
 
         public Menu()
         {
@@ -110,37 +116,66 @@ namespace GygaxVisu.Controls
         {
             List<string> cameraList = UsbCamera.GetDevices();
 
-            if (cameraList.Count > 0) LocalCamera.IsEnabled = true;
+            if (cameraList.Count > 0) Camera.IsEnabled = true;
 
             MenuItem menuItem;
 
-            foreach (var camera in cameraList.Select((value, i) => new { i, value }))
+            foreach (var camera in cameraList.Select((value, i) => new {i, value}))
             {
                 menuItem = new MenuItem();
                 menuItem.Header = camera.value;
                 menuItem.Click += delegate
                 {
-                    if(!UsbCamera.IsCameraOpened(camera.i))
+                    if (!UsbCamera.IsCameraOpened(camera.i))
                         _viewModel.Items.Add(new UsbCamera(camera.i));
                 };
 
-                LocalCamera.Items.Add(menuItem);
+                Camera.Items.Add(menuItem);
             }
 
-            LocalCamera.Items.Add(new Separator());
+            Camera.Items.Add(new Separator());
 
             menuItem = new MenuItem();
-            menuItem.Header = "All cameras";
+            menuItem.Header = "All local cameras";
             menuItem.Click += delegate
             {
-                foreach (var camera in cameraList.Select((value, i) => new { i, value }))
+                foreach (var camera in cameraList.Select((value, i) => new {i, value}))
                 {
                     if (!UsbCamera.IsCameraOpened(camera.i))
                         _viewModel.Items.Add(new UsbCamera(camera.i));
                 }
             };
 
-            LocalCamera.Items.Add(menuItem);
+            Camera.Items.Add(menuItem);
+
+            var networkItem = new MenuItem()
+            {
+                Header = "Network camera"
+            };
+
+            networkItem.Click += delegate
+            {
+                var dia = new NetworkCameraDialog();
+                dia.Show();
+                dia.Closing += delegate(object o, CancelEventArgs args)
+                {
+                    if (!dia.ok)
+                        return;
+                    try
+                    {
+                        System.Net.IPAddress ipaddress = System.Net.IPAddress.Parse(dia.IpBlock1.Text + "." + dia.IpBlock2.Text + "." + dia.IpBlock3.Text + "." + dia.IpBlock4.Text);
+
+                        _viewModel.Items.Add(new NetworkCamera(ipaddress.ToString()));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetCurrentClassLogger().Warn(ex, "Can't open camera, not a valid network address");
+                    }
+                    
+                };
+            };
+
+            Camera.Items.Add(networkItem);
         }
 
         private void MenuItemExit_OnClick(object sender, RoutedEventArgs e)

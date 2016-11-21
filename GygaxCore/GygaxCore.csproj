@@ -163,6 +163,7 @@
   <ItemGroup>
     <Compile Include="DataStructures\CameraPosition.cs" />
     <Compile Include="DataStructures\GygaxVideo.cs" />
+    <Compile Include="Devices\NetworkCamera.cs" />
     <Compile Include="Processors\MyMethod.cs" />
     <Compile Include="Processors\Threshold.cs" />
     <Compile Include="Processors\EdgeDetector.cs" />
