@@ -10,19 +10,8 @@
 
         <Menu IsMainMenu="True">
             <MenuItem Header="_File">
-                <!--<MenuItem Header="_Image" Click="NewImage_OnClick" />-->
-                <!--<MenuItem Header="_Video" Click="MenuItem_OnClick" />-->
                 <MenuItem Header="_Open file" Click="OpenFile_OnClick" />
                 <MenuItem Header="_Open local Camera" Name="LocalCamera" Initialized="FrameworkElement_OnInitialized" IsEnabled="False"/>
-                <!--<Separator/>-->
-                <!--<MenuItem Header="_Pointcloud" Click="PointCloud_OnClick"/>-->
-                <!--<MenuItem Header="_Potree" Click="Potree_OnClick"/>-->
-                <!--<MenuItem Header="_3D device" IsEnabled="False"/>-->
-                <!--<Separator/>-->
-                <!--<MenuItem Header="_IFC file" Click="OpenIfcFile_OnClick"/>-->
-                <!--<Separator/>-->
-                <!--<MenuItem Header="_Visual SFM reconstruction" Click="Vsfm_OnClick"/>-->
-                <!--<MenuItem Header="_Scene Scanner Positions" Click="Scene_OnClick"/>-->
                 <Separator/>
                 <MenuItem Header="_Save all" IsEnabled="False"/>
                 <Separator/>
