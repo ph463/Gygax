@@ -10,7 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using GygaxCore.DataStructures;
 using GygaxCore.Interfaces;
+using NLog;
 
 namespace GygaxCore.Devices
 {
@@ -35,13 +37,15 @@ namespace GygaxCore.Devices
 
         public NetworkCamera(String Ip)
         {
-            camIp = Ip;
+            LogManager.GetCurrentClassLogger().Info("Opening network camera");
+
+            camIp += Ip;
             _thread = new Thread(new ThreadStart(WorkThreadFunction));
 
             _thread.Name = "NetworkCamera " + Ip;
+
+            _thread.Start();
         }
-
-
 
         private void WorkThreadFunction()
         {
@@ -136,6 +140,7 @@ namespace GygaxCore.Devices
             catch (Exception e1)
             {
                 Console.WriteLine("Error: {0}", e1.ToString());
+                LogManager.GetCurrentClassLogger().Warn(e1,"Can't open network camera");
             }
         }
 

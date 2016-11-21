@@ -44,8 +44,8 @@ namespace GygaxCore.DataStructures
                 timestamp = reader.ReadInt64();
                 length = reader.ReadInt32();
 
-                //if(previousTimestamp != long.MinValue)
-                //    Thread.Sleep((int)(timestamp - previousTimestamp));
+                if (previousTimestamp != long.MinValue)
+                    Thread.Sleep((int)(timestamp - previousTimestamp));
 
                 previousTimestamp = timestamp;
 
