@@ -213,6 +213,7 @@
     <Compile Include="Helpers\PrimitiveBuilder.cs" />
     <Compile Include="Helpers\ViewModel.cs" />
     <Compile Include="Helpers\ViewportHelper.cs" />
+    <Compile Include="Method\UvMapper.cs" />
     <Compile Include="Visualizer\IfcVisualizer.cs" />
     <Compile Include="Visualizer\CoordinateSystemVisualizer.cs" />
     <Compile Include="Visualizer\PointcloudVisualizer.cs" />
@@ -313,9 +314,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Method\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
