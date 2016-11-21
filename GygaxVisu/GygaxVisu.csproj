@@ -213,6 +213,7 @@
     <Compile Include="Helpers\PrimitiveBuilder.cs" />
     <Compile Include="Helpers\ViewModel.cs" />
     <Compile Include="Helpers\ViewportHelper.cs" />
+    <Compile Include="Method\Triangle.cs" />
     <Compile Include="Method\UvMapper.cs" />
     <Compile Include="Visualizer\IfcVisualizer.cs" />
     <Compile Include="Visualizer\CoordinateSystemVisualizer.cs" />

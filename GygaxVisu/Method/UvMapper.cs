@@ -424,48 +424,48 @@ namespace GygaxVisu
 
         private delegate Bgr DoAfterGetAddresses(int x, int y);
 
-        public void GenerateSurfaceImageryFromCameraList(ref Dictionary<Triangle, List<CameraPosition>> dict, ref Dictionary<CameraPosition, List<Triangle>> tris, List<CameraPosition> cameraPositions, List<Triangle> triangles, bool generateTextureFile = true, bool generateMaskFile = false)
-        {
-            var projectionBase = new PlaneReconstructor.ProjectionBase();
+        //public void GenerateSurfaceImageryFromCameraList(ref Dictionary<Triangle, List<CameraPosition>> dict, ref Dictionary<CameraPosition, List<Triangle>> tris, List<CameraPosition> cameraPositions, List<Triangle> triangles, bool generateTextureFile = true, bool generateMaskFile = false)
+        //{
+        //    var projectionBase = new PlaneReconstructor.ProjectionBase();
             
-            var planeReconstructor = new PlaneReconstructor(cameraPositions, projectionBase, null, _model);
+        //    var planeReconstructor = new PlaneReconstructor(cameraPositions, projectionBase, null, _model);
 
-            planeReconstructor.Init();
-            planeReconstructor.Dict = dict;
-            planeReconstructor.TrianglesToConsider = tris;
+        //    planeReconstructor.Init();
+        //    planeReconstructor.Dict = dict;
+        //    planeReconstructor.TrianglesToConsider = tris;
 
-            //planeReconstructor.Triangles = allTriangles;
+        //    //planeReconstructor.Triangles = allTriangles;
 
-            var image = new ReconstructionContainer(TextureWidth, TextureHeight);
+        //    var image = new ReconstructionContainer(TextureWidth, TextureHeight);
 
-            Stopwatch sw = new Stopwatch();
+        //    Stopwatch sw = new Stopwatch();
 
-            sw.Start();
+        //    sw.Start();
 
-            //for (int i = 0; i < _geometry.TextureCoordinates.Count; i += 3)
-            //foreach (var triangle in triangles)
-            Parallel.ForEach(triangles, triangle =>
-            {
-                planeReconstructor.ReconstructRayTracer(
-                    image,
-                    triangle,
-                    TextureWidth,
-                    TextureHeight
-                );
-            });
+        //    //for (int i = 0; i < _geometry.TextureCoordinates.Count; i += 3)
+        //    //foreach (var triangle in triangles)
+        //    Parallel.ForEach(triangles, triangle =>
+        //    {
+        //        planeReconstructor.ReconstructRayTracer(
+        //            image,
+        //            triangle,
+        //            TextureWidth,
+        //            TextureHeight
+        //        );
+        //    });
 
-            if (generateMaskFile)
-                planeReconstructor.SaveMasks();
+        //    if (generateMaskFile)
+        //        planeReconstructor.SaveMasks();
 
-            if (generateTextureFile)
-                image.Save(TextureFilename);
+        //    if (generateTextureFile)
+        //        image.Save(TextureFilename);
 
-            sw.Stop();
+        //    sw.Stop();
 
-            Console.WriteLine("Elapsed={0}", sw.Elapsed);
+        //    Console.WriteLine("Elapsed={0}", sw.Elapsed);
 
-            Debug.WriteLine(Path.GetFileName(TextureFilename));
-        }
+        //    Debug.WriteLine(Path.GetFileName(TextureFilename));
+        //}
 
         public void GenerateSurfaceImageryColorPattern2()
         {
