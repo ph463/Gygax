@@ -14,6 +14,7 @@ using SharpDX.Direct3D11;
 using IImage = Emgu.CV.IImage;
 using Point = System.Drawing.Point;
 using System.Linq;
+using System.Windows.Media.Imaging;
 
 namespace GygaxCore.Ifc
 {
@@ -1407,6 +1408,10 @@ namespace GygaxCore.Ifc
         public ImageSource ImageSource { get; }
         public IImage CvSource { get; set; }
         public void Close()
+        {
+        }
+
+        public void Save()
         {
         }
     }

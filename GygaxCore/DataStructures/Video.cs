@@ -16,6 +16,7 @@ namespace GygaxCore.DataStructures
 
         public Video(string filename)
         {
+            Location = filename;
             _capture = new Capture(filename);
             _framesPerSecond = _capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps);
 

@@ -16,6 +16,8 @@ namespace GygaxCore.Interfaces
 
         void Close();
 
+        void Save();
+
         string Location { get; }
 
         string Name { get; }

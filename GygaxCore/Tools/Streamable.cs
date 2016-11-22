@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
@@ -11,6 +12,8 @@ using GygaxCore.Interfaces;
 using IImage = Emgu.CV.IImage;
 using Size = System.Drawing.Size;
 using NLog;
+using System.IO;
+using System.Linq;
 
 namespace GygaxCore.DataStructures
 {
@@ -116,6 +119,61 @@ namespace GygaxCore.DataStructures
 
         public virtual void Close()
         {
+        }
+
+        public virtual void Save()
+        {
+            if (Location == null || Location.Equals(""))
+                return;
+
+            var path = Path.GetDirectoryName(Location) + @"\";
+            var file = Path.GetFileNameWithoutExtension(Location);
+            var extension = ".jpg";
+
+            var newfile = "";
+
+            var counter = 0;
+
+            do
+            {
+                newfile = path + file + "." + counter + extension;
+                counter++;
+
+                if (counter > 999)
+                    return;
+
+            } while (File.Exists(newfile));
+            
+            try
+            {
+                CvSource.Save(newfile);
+            }
+            catch (Exception e)
+            {
+                counter = 0;
+
+                do
+                {
+                    newfile = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\" +file + "." + counter + extension;
+                    counter++;
+
+                    if (counter > 999)
+                        return;
+
+                } while (File.Exists(newfile));
+
+                try
+                {
+                    CvSource.Save(newfile);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetCurrentClassLogger().Error(e, "Can't save file");
+                    return;
+                }
+            }
+
+            LogManager.GetCurrentClassLogger().Info("File saved " + newfile);
         }
     }
 }

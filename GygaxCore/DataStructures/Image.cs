@@ -16,15 +16,15 @@ namespace GygaxCore.DataStructures
             {
                 _file = value;
                 CvSource = new Image<Bgr, Byte>(File.LocalPath);
-                Filename = Path.GetFileName(File.LocalPath);
             }
         }
 
-        public string Filename { get; private set; }
+        //public string Filename { get; private set; }
 
         public Image(string filename)
         {
-            File = new Uri(filename);
+            Location = filename;
+            File = new Uri(Location);
         }
 
         public override void Close() { }

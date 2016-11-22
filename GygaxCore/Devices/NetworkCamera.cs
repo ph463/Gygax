@@ -44,6 +44,8 @@ namespace GygaxCore.Devices
 
             _thread.Name = "NetworkCamera " + Ip;
 
+            Location = _thread.Name;
+
             _thread.Start();
         }
 

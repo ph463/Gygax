@@ -56,6 +56,14 @@ namespace GygaxVisu
 
         }
 
+        public void SaveAll()
+        {
+            foreach (var item in Items)
+            {
+                item.Save();
+            }
+        }
+
         public event EventHandler ClearWorkspace;
 
 
