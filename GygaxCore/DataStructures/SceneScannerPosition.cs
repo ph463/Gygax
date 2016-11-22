@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Media.Media3D;
 
 namespace GygaxCore.DataStructures
@@ -10,6 +11,9 @@ namespace GygaxCore.DataStructures
         public SceneScannerPosition(string file)
         {
             Data = ReadScannerPositions(file);
+
+            Location = file;
+            Name = Path.GetFileNameWithoutExtension(Location);
         }
 
         public static List<CameraPosition> ReadScannerPositions(string file)
