@@ -8,6 +8,8 @@
              mc:Ignorable="d"
              >
     <Grid>
+        <Border x:Name="RecordingFrame" BorderThickness="0" BorderBrush="Red">
         <Image Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform"/>
+        </Border>
     </Grid>
 </UserControl>

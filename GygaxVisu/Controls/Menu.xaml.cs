@@ -2,31 +2,18 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GygaxCore;
 using GygaxCore.DataStructures;
 using GygaxCore.Devices;
 using GygaxCore.Ifc;
+using GygaxCore.Processors;
 using GygaxVisu.Dialogs;
 using Image = GygaxCore.DataStructures.Image;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
-using GygaxVisu.Visualizer;
-using HelixToolkit.Wpf.SharpDX;
 using NLog;
-using PclWrapper;
-using SharpDX;
 
 namespace GygaxVisu.Controls
 {
@@ -114,6 +101,37 @@ namespace GygaxVisu.Controls
 
         private void FrameworkElement_OnInitialized(object sender, EventArgs e)
         {
+            var networkItem = new MenuItem()
+            {
+                Header = "Network camera"
+            };
+
+            networkItem.Click += delegate
+            {
+                var dia = new NetworkCameraDialog();
+                dia.Show();
+                dia.Closing += delegate (object o, CancelEventArgs args)
+                {
+                    if (!dia.ok)
+                        return;
+                    try
+                    {
+                        System.Net.IPAddress ipaddress = System.Net.IPAddress.Parse(dia.IpBlock1.Text + "." + dia.IpBlock2.Text + "." + dia.IpBlock3.Text + "." + dia.IpBlock4.Text);
+
+                        _viewModel.Items.Add(new NetworkCamera(ipaddress.ToString()));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetCurrentClassLogger().Warn(ex, "Can't open camera, not a valid network address");
+                    }
+
+                };
+            };
+
+            Camera.Items.Add(networkItem);
+
+            Camera.Items.Add(new Separator());
+
             List<string> cameraList = UsbCamera.GetDevices();
 
             if (cameraList.Count > 0) Camera.IsEnabled = true;
@@ -147,35 +165,6 @@ namespace GygaxVisu.Controls
             };
 
             Camera.Items.Add(menuItem);
-
-            var networkItem = new MenuItem()
-            {
-                Header = "Network camera"
-            };
-
-            networkItem.Click += delegate
-            {
-                var dia = new NetworkCameraDialog();
-                dia.Show();
-                dia.Closing += delegate(object o, CancelEventArgs args)
-                {
-                    if (!dia.ok)
-                        return;
-                    try
-                    {
-                        System.Net.IPAddress ipaddress = System.Net.IPAddress.Parse(dia.IpBlock1.Text + "." + dia.IpBlock2.Text + "." + dia.IpBlock3.Text + "." + dia.IpBlock4.Text);
-
-                        _viewModel.Items.Add(new NetworkCamera(ipaddress.ToString()));
-                    }
-                    catch (Exception ex)
-                    {
-                        LogManager.GetCurrentClassLogger().Warn(ex, "Can't open camera, not a valid network address");
-                    }
-                    
-                };
-            };
-
-            Camera.Items.Add(networkItem);
         }
 
         private void MenuItemExit_OnClick(object sender, RoutedEventArgs e)

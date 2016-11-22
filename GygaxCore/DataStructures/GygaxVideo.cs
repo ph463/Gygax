@@ -5,6 +5,7 @@ using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using GygaxCore.Interfaces;
+using NLog;
 
 namespace GygaxCore.DataStructures
 {
@@ -44,8 +45,16 @@ namespace GygaxCore.DataStructures
                 timestamp = reader.ReadInt64();
                 length = reader.ReadInt32();
 
-                if (previousTimestamp != long.MinValue)
-                    Thread.Sleep((int)(timestamp - previousTimestamp));
+                try
+                {
+                    if (previousTimestamp != long.MinValue)
+                        Thread.Sleep((int) (timestamp - previousTimestamp));
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetCurrentClassLogger().Warn(e, "Video file corrupt");
+                }
+
 
                 previousTimestamp = timestamp;
 
