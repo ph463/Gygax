@@ -44,7 +44,7 @@ namespace GygaxVisu.Controls
             Viewport.RenderTechnique = Viewport.RenderTechniquesManager.RenderTechniques[DefaultRenderTechniqueNames.Blinn];
             Viewport.EffectsManager = new DefaultEffectsManager(Viewport.RenderTechniquesManager);
 
-            SetLight();
+            InitViewport();
 
             SetBinding(DataContextProperty, new Binding());
 
@@ -77,13 +77,29 @@ namespace GygaxVisu.Controls
         {
             var x = Viewport.CurrentPosition;
         }
-
-        private void SetLight()
+        public void InitViewport()
         {
-            Viewport.Items.Add(new DirectionalLight3D {Direction = new SharpDX.Vector3(1, 1, 1)});
-            Viewport.Items.Add(new DirectionalLight3D { Direction = new SharpDX.Vector3(-1, -1, -1) });
+            Viewport.Items.Clear();
+
+            var model = new AmbientLight3D { Color = new Color4(1, 1, 1, 1) };
+
+            if (Viewport.RenderHost != null && Viewport.RenderHost.RenderTechnique != null)
+                model.Attach(Viewport.RenderHost);
+            Viewport.Items.Add(model);
+
+            var model2 = new DirectionalLight3D { Direction = new Vector3(1, 1, 1) };
+            if (Viewport.RenderHost != null && Viewport.RenderHost.RenderTechnique != null)
+                model2.Attach(Viewport.RenderHost);
+            Viewport.Items.Add(model2);
+
+            var model3 = new DirectionalLight3D { Direction = new Vector3(-1, -1, -1) };
+            if (Viewport.RenderHost != null && Viewport.RenderHost.RenderTechnique != null)
+                model3.Attach(Viewport.RenderHost);
+
+            Viewport.Items.Add(model3);
+
         }
-        
+
         public void UpdateView()
         {
             if (Visibility != Visibility.Visible)

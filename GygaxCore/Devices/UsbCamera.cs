@@ -20,8 +20,6 @@ namespace GygaxCore.Devices
         
         private bool _stop;
 
-        public string Location { get; private set; }
-
         private static List<int> _openCameras;
         private int _cameraIndex;
 

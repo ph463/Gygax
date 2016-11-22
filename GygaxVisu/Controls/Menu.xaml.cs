@@ -177,7 +177,6 @@ namespace GygaxVisu.Controls
             _viewModel.Clear();
         }
 
-
         private void Correction_OnClick(object sender, RoutedEventArgs e)
         {
             var cs = new CoordinateSystem();
@@ -275,6 +274,11 @@ namespace GygaxVisu.Controls
         private void ObjectExport_OnClick(object sender, RoutedEventArgs e)
         {
             Methods.ExportToObject();
+        }
+
+        private void SaveAll_OnClick(object sender, RoutedEventArgs e)
+        {
+            _viewModel.SaveAll();
         }
     }
 }

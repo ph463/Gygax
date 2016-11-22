@@ -13,7 +13,7 @@
                 <MenuItem Header="_Open file" Click="OpenFile_OnClick" />
                 <MenuItem Header="_Open camera" Name="Camera" Initialized="FrameworkElement_OnInitialized" IsEnabled="False"/>
                 <Separator/>
-                <MenuItem Header="_Save all" IsEnabled="False"/>
+                <MenuItem Header="_Save all" Click="SaveAll_OnClick"/>
                 <Separator/>
                 <MenuItem Header="_Print" IsEnabled="False"/>
                 <Separator/>
