@@ -46,6 +46,35 @@ namespace GygaxVisu.Controls
             SetBinding(DataContextProperty, new Binding());
             
             SizeChanged += OnSizeChanged;
+
+            InitializeContextMenu();
+        }
+
+        private bool _controlHidden = false;
+
+        private void InitializeContextMenu()
+        {
+            ContextMenu = new ContextMenu();
+            
+            var hideItem = new MenuItem()
+            {
+                Header = "Hide"
+            };
+
+            hideItem.Click += delegate (object sender, RoutedEventArgs args)
+            {
+                _controlHidden = !_controlHidden;
+
+                if (_controlHidden)
+                    Height = 10;
+                else
+                {
+                    Height = Double.NaN; // Auto height
+                }
+                hideItem.IsChecked = _controlHidden;
+            };
+
+            ContextMenu.Items.Add(hideItem);
         }
 
         public void InitViewport()
@@ -78,12 +107,14 @@ namespace GygaxVisu.Controls
                 Viewport.ShowCoordinateSystem = true;
                 Viewport.ShowViewCube = true;
                 Viewport.IsEnabled = true;
+                ContextMenu = null;
             }
             else
             {
                 Viewport.ShowCoordinateSystem = false;
                 Viewport.ShowViewCube = false;
                 Viewport.IsEnabled = false;
+                InitializeContextMenu();
             }
         }
 
