@@ -36,8 +36,6 @@ namespace GygaxCore.DataStructures
             }
         }
 
-        public string Filename;
-
         public ImageSource ImageSource { get; }
 
         public IImage CvSource { get; set; }
@@ -52,7 +50,8 @@ namespace GygaxCore.DataStructures
 
         public Pointcloud(string filename)
         {
-            Filename = filename;
+            Location = filename;
+            Name = Path.GetFileNameWithoutExtension(Location);
 
             var thread = new Thread(LoadThreadFunction)
             {
@@ -65,7 +64,7 @@ namespace GygaxCore.DataStructures
         {
             PCD wrapper = new PCD();
 
-            Points[] rawPoints = wrapper.LoadPointcloud(Filename);
+            Points[] rawPoints = wrapper.LoadPointcloud(Location);
 
             var points = new PointGeometry3D();
             var col = new Color4Collection();

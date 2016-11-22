@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using GygaxCore.DataStructures;
 using GygaxCore.Ifc;
+using GygaxCore.Interfaces;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
@@ -21,7 +25,7 @@ namespace GygaxVisu.Visualizer
                 return null;
 
             var t = data.GetType();
-            
+
             if (t == typeof(NViewMatch))
             {
                 return NViewMatchVisualizer.GetModels((NViewMatch)data);
@@ -35,9 +39,9 @@ namespace GygaxVisu.Visualizer
                 });
             }
 
-            if (t == typeof (IfcViewerWrapper))
+            if (t == typeof(IfcViewerWrapper))
             {
-                return IfcVisualizer.GetModels((IfcViewerWrapper) data);
+                return IfcVisualizer.GetModels((IfcViewerWrapper)data);
             }
 
             if (t == typeof(Pointcloud))
@@ -56,6 +60,81 @@ namespace GygaxVisu.Visualizer
             }
 
             return null;
+        }
+
+        public static TreeViewItem GetTreeItems(TreeViewItem treeNode, GeometryModel3D model)
+        {
+            var items = GetTreeItems((IStreamable)((TreeViewItem) (treeNode.Parent)).DataContext, new[] {model});
+
+            var childItem = (TreeViewItem) items.Items[0];
+
+            items.Items.Remove(childItem);
+            
+            return childItem;
+        }
+
+        public static TreeViewItem GetTreeItems(IStreamable data, GeometryModel3D[] models)
+        {
+            if (data == null)
+                return null;
+
+            var t = data.GetType();
+            
+
+            if (t == typeof(IfcViewerWrapper))
+            {
+                return IfcVisualizer.GetTreeItems((IfcViewerWrapper)data, models);
+            }
+            else
+            {
+                return GetStandardTreeItems(data, models);
+            }
+        }
+
+        private static TreeViewItem GetStandardTreeItems(IStreamable data, GeometryModel3D[] models)
+        {
+            var treeItem = new TreeViewItem()
+            {
+                Header = data.Name,
+                DataContext = data
+            };
+
+            if (models == null) return null;
+
+            foreach (var model in models)
+            {
+                var subItem = new TreeViewItem()
+                {
+                    Header = model.Name,
+                    DataContext = model
+                };
+
+                var hideItem = new TreeViewItem()
+                {
+                    Header = "hide",
+                };
+
+                hideItem.MouseUp += delegate (object sender, MouseButtonEventArgs args)
+                {
+                    if (model.Visibility == Visibility.Visible)
+                    {
+                        model.Visibility = Visibility.Hidden;
+                        hideItem.Header = "show";
+                    }
+                    else
+                    {
+                        model.Visibility = Visibility.Visible;
+                        hideItem.Header = "hide";
+                    }
+
+                };
+
+                subItem.Items.Add(hideItem);
+
+                treeItem.Items.Add(subItem);
+            }
+
+            return treeItem;
         }
 
         protected static GeometryModel3D[] GetCamera(CameraPosition camera)
