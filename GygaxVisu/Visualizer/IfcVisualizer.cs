@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using GygaxCore.DataStructures;
@@ -25,6 +28,71 @@ namespace GygaxVisu.Visualizer
             var modelList = GetItems(ifc);
 
             return modelList.Cast<GeometryModel3D>().ToArray();
+        }
+
+        public static TreeViewItem GetTreeItems(IfcViewerWrapper ifcModel, GeometryModel3D[] models)
+        {
+            var treeItem = new TreeViewItem()
+            {
+                Header = ifcModel.Name,
+                DataContext = ifcModel
+            };
+
+            if (models == null) return null;
+
+            foreach (var model in models)
+            {
+                var subItem = new TreeViewItem()
+                {
+                    Header = model.Name,
+                    DataContext = model
+                };
+
+                var ifcTree = ((IfcMeshGeometryModel3D) model).IfcTreeNode;
+                addSubtree(ref subItem, ifcTree);
+
+                var hideItem = new TreeViewItem()
+                {
+                    Header = "hide",
+                };
+
+                hideItem.MouseUp += delegate(object sender, MouseButtonEventArgs args)
+                {
+                    if(model.Visibility == Visibility.Visible)
+                    {
+                        model.Visibility = Visibility.Hidden;
+                        hideItem.Header = "show";
+                    }
+                    else
+                    {
+                        model.Visibility = Visibility.Visible;
+                        hideItem.Header = "hide";
+                    }
+
+                };
+
+                subItem.Items.Add(hideItem);
+
+                treeItem.Items.Add(subItem);
+            }
+
+            return treeItem;
+        }
+
+        private static void addSubtree(ref TreeViewItem viewTree, TreeNode<TreeElement> ifcTree)
+        {
+            foreach (var child in ifcTree.Children)
+            {
+                var t = new TreeViewItem()
+                {
+                    Header = child.Value.Key + " " + child.Value.Value + " " + child.Value.GlobalId,
+                    DataContext = child.Value
+                };
+
+                addSubtree(ref t, child);
+
+                viewTree.Items.Add(t);
+            }
         }
 
         public static IfcMeshGeometryModel3D[] GetItems(IfcViewerWrapper model, bool loadTexture = true, string[] filter = null)
@@ -125,7 +193,7 @@ namespace GygaxVisu.Visualizer
             }
         }
 
-        public static void Draw(IFCItem element, ref List<IfcMeshGeometryModel3D> modelList, string[] filter)
+        private static void Draw(IFCItem element, ref List<IfcMeshGeometryModel3D> modelList, string[] filter)
         {
             while (element != null)
             {

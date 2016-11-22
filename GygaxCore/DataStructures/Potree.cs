@@ -11,7 +11,7 @@ namespace GygaxCore.DataStructures
     {
         public Potree(Uri file)
         {
-            Filename = file.LocalPath;
+            Location = file.LocalPath;
 
             var thread = new Thread(LoadThreadFunction)
             {
@@ -22,7 +22,7 @@ namespace GygaxCore.DataStructures
         
         private void LoadThreadFunction()
         {
-            var pt = new PotreeNode(new Uri(Filename));
+            var pt = new PotreeNode(new Uri(Location));
             
             var points = new PointGeometry3D();
             var col = new Color4Collection();

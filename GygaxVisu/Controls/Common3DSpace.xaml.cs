@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using GygaxCore;
@@ -17,7 +17,10 @@ using HelixToolkit.Wpf.SharpDX;
 using NLog;
 using SharpDX;
 using Xceed.Wpf.Toolkit.Core.Converters;
+using Binding = System.Windows.Data.Binding;
 using Color = SharpDX.Color;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace GygaxVisu.Controls
 {
@@ -55,10 +58,10 @@ namespace GygaxVisu.Controls
             try
             {
                 if (routedPropertyChangedEventArgs.OldValue != null)
-                ((IfcMeshGeometryModel3D)((TreeViewItem)routedPropertyChangedEventArgs.OldValue).DataContext).Material = originalMaterialOfSelectedItem;
+                ((MeshGeometryModel3D)((TreeViewItem)routedPropertyChangedEventArgs.OldValue).DataContext).Material = originalMaterialOfSelectedItem;
                 
                 var element =
-                    (IfcMeshGeometryModel3D) ((TreeViewItem) routedPropertyChangedEventArgs.NewValue).DataContext;
+                    (MeshGeometryModel3D) ((TreeViewItem) routedPropertyChangedEventArgs.NewValue).DataContext;
 
                 element.IsSelected = true;
                 originalMaterialOfSelectedItem = (PhongMaterial) element.Material;
@@ -96,7 +99,7 @@ namespace GygaxVisu.Controls
                 //Check if datastream is already in the tree
                 foreach (var item in DatastreamTree.Items)
                 {
-                    if (((TreeViewItem)item).Header == null || ((TreeViewItem) item).Header.Equals(streamable.Name))
+                    if ((TreeViewItem)item == null || ((TreeViewItem) item).DataContext == streamable)
                     {
                         foundOne = true;
                         break;
@@ -105,47 +108,19 @@ namespace GygaxVisu.Controls
 
                 if (foundOne) continue;
 
-                var treeItem = new TreeViewItem()
-                {
-                    Header = streamable.Name
-                };
-
-                DatastreamTree.Items.Add(treeItem);
-
-                //var contextItem = new MenuItem()
-                //{
-                //    Header = streamable.Name
-                //};
-
-                //ContextMenuLayers.Items.Add(contextItem);
-
                 var elements = Visualizer.Visualizer.GetModels(streamable.Data);
 
+                DatastreamTree.Items.Add(Visualizer.Visualizer.GetTreeItems(streamable, elements));
+
                 if (elements == null) continue;
-                
+
                 foreach (var model in elements)
                 {
                     if (Viewport.RenderHost.RenderTechnique != null)
                     {
                         model.Attach(Viewport.RenderHost);
                     }
-                    
-                    var subItem = new TreeViewItem()
-                    {
-                        Header = model.Name,
-                        DataContext = model
-                    };
 
-                    try
-                    {
-                        var ifcTree = ((IfcMeshGeometryModel3D) model).IfcTreeNode;
-                        addSubtree(ref subItem,ifcTree);
-                    }
-                    catch(Exception)
-                    { }
-
-                    treeItem.Items.Add(subItem);
-                    
                     Viewport.Items.Add(model);
                 }
             }
@@ -153,20 +128,6 @@ namespace GygaxVisu.Controls
             ViewportHelper.ZoomExtents(Viewport);
         }
 
-        private void addSubtree(ref TreeViewItem viewTree, TreeNode<TreeElement> ifcTree)
-        {
-            foreach (var child in ifcTree.Children)
-            {
-                var t = new TreeViewItem()
-                {
-                    Header = child.Value.Key + " " + child.Value.Value + " " + child.Value.GlobalId
-                };
-
-                addSubtree(ref t, child);
-
-                viewTree.Items.Add(t);
-            }
-        }
 
         public void ItemsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
         {
@@ -201,6 +162,9 @@ namespace GygaxVisu.Controls
         
         private void Viewport_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton != MouseButton.Left)
+                return;
+
             var hits = Viewport.FindHits(e.GetPosition(this));
 
             if (hits.Count == 0) return;
@@ -211,19 +175,23 @@ namespace GygaxVisu.Controls
             try
             {
                 var element =
-                    (IfcMeshGeometryModel3D)
                     hits.OrderBy(q => q.Distance).Select(r => r.ModelHit).First(s => s.Visibility == Visibility.Visible);
                 
                 var treeItem = getTreeItem(element, DatastreamTree.Items);
                 treeItem.IsSelected = true;
                 treeItem.IsExpanded = true;
+                
+                ContextMenu contextMenu = new ContextMenu();
+                contextMenu.Items.Add(Visualizer.Visualizer.GetTreeItems(treeItem, element));
+                
+                contextMenu.IsOpen = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
             }
         }
 
-        private TreeViewItem getTreeItem(IfcMeshGeometryModel3D element, ItemCollection items)
+        private TreeViewItem getTreeItem(object element, ItemCollection items)
         {
             foreach (TreeViewItem item in items)
             {
