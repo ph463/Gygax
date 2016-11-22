@@ -12,6 +12,7 @@ namespace GygaxCore.DataStructures
             set
             {
                 _file = value;
+                Location = value.LocalPath;
                 Data = NViewMatchLoader.Open(_file, false);
             }
         }

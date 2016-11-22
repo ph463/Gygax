@@ -176,5 +176,10 @@ namespace GygaxVisu.Controls
         {
             _viewModel.Clear();
         }
+
+        private void SaveAll_OnClick(object sender, RoutedEventArgs e)
+        {
+            _viewModel.SaveAll();
+        }
     }
 }

@@ -45,6 +45,10 @@ namespace GygaxCore.DataStructures
             _stop = true;
         }
 
+        public void Save()
+        {
+        }
+
         public Pointcloud()
         { }
 
