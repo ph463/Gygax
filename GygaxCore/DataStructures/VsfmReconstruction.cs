@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace GygaxCore.DataStructures
 {
@@ -14,6 +15,7 @@ namespace GygaxCore.DataStructures
                 _file = value;
                 Location = value.LocalPath;
                 Data = NViewMatchLoader.Open(_file, false);
+                Name = Path.GetFileNameWithoutExtension(Location);
             }
         }
 
