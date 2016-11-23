@@ -276,9 +276,9 @@ namespace GygaxVisu.Method
 
             //CheckFrustum(ref cameraPositions, ref triangles, out dict, out tris);
 
-            //var listDoGenerate =
-            //    p.Where(q => q.IfcName.Contains("Column")).Where(q => !q.IfcName.Contains("251769")).ToList();
-            
+            //var listDoGenerate = p.Where(q => q.IfcName.Contains("Column")).Where(q => !q.IfcName.Contains("251769")).ToList();
+            //var listDoGenerate = p.OrderBy(q => q.IfcName);
+            //var listDoGenerate = p.Where(q => q.IfcName.Contains("736")).ToList();
 
             //foreach (var item in listDoGenerate)
             //{
@@ -286,24 +286,17 @@ namespace GygaxVisu.Method
             //}
         }
 
-        //public static Viewport3DX Viewport;
-        public static List<MeshGeometryModel3D> models = new List<MeshGeometryModel3D>();
-
-        public static void CalculateTexture(
-            string nvmFile, string ifcFile, string textureDirectory, string[] elementName, bool generateTextureFile = true, bool generateMaskFile = false)
+        public static List<CameraPosition> applyTransform(ref NViewMatch[] nViewMatch)
         {
-            var nvm = NViewMatchLoader.OpenMultiple(new Uri(nvmFile));
-
             var cameraPositions = new List<CameraPosition>();
 
-            foreach (var nViewMatch in nvm)
+            foreach (var nvm in nViewMatch)
             {
-                if (!File.Exists(nViewMatch.TransformationFilename)) continue;
+                if (!File.Exists(nvm.TransformationFilename)) continue;
 
-                var transform =
-                               CoordinateSystem.OpenTransformation(nViewMatch.TransformationFilename);
+                var transform = CoordinateSystem.OpenTransformation(nvm.TransformationFilename);
 
-                foreach (var cameraPosition in nViewMatch.CameraPositions)
+                foreach (var cameraPosition in nvm.CameraPositions)
                 {
                     var cp = cameraPosition;
 
@@ -313,27 +306,82 @@ namespace GygaxVisu.Method
                 }
             }
 
-            // ToDo: Bind to load successful
-            //var f = new IfcViewerWrapper();
-            //f.OpenIFCFile(ifcFile);
+            return cameraPositions;
+        }
 
-            //var triangles = new List<Triangle>();
+        //public static Viewport3DX Viewport;
+        public static List<MeshGeometryModel3D> models = new List<MeshGeometryModel3D>();
 
-            //var p = IfcVisualizer.GetItems(f, false, elementName);
+        public static void CalculateTexture(
+            string nvmFile, string ifcFile, string textureDirectory, string[] elementName, bool generateTextureFile = true, bool generateMaskFile = false)
+        {
 
-            //foreach (var item in p)
-            //{
-            //    item.Mapper = new UvMapper((MeshGeometry3D)item.Geometry, p, item.IfcName, false)
-            //    {
-            //        TextureFilename = textureDirectory + IfcViewerWrapper.GetValidPathName(item.IfcName) + ".jpg",
-            //        TextureHeight = item.TextureHeight,
-            //        TextureWidth = item.TextureWidth
-            //    };
 
-            //    item.Mapper.GenerateIndexes();
+            var nvm = NViewMatchLoader.OpenMultiple(new Uri(nvmFile), false);
+            var nvmGlobal = NViewMatchLoader.OpenMultiple(new Uri(@"Z:\06. Data\Bridges\Philipp\Bridge 1\JustImages\sparse.nvm"), false);
 
-            //    triangles.AddRange(item.Mapper.Triangles);
-            //}
+            var commonImages = FindCommonImages(nvmGlobal, nvm);
+
+            //var cameraPositions = applyTransform(ref nvm);
+
+            var cameraPositions = nvm[0].CameraPositions;
+            var globalCameraPositions = applyTransform(ref nvmGlobal);
+
+            var cs = new CoordinateSystem();
+
+            foreach (var image in commonImages)
+            {
+                var localCamera = cameraPositions.Where(q => q.File.Contains(image)).First();
+                var globalCamera = globalCameraPositions.Where(q => q.File.Contains(image)).First();
+
+                cs.Correspondences.Add(new CoordinateSystem.Correspondence()
+                {
+                    LocalCoordinateSystem = localCamera.CameraCenter.ToVector3(),
+                    ParentCoordinateSystem = globalCamera.CameraCenter.ToVector3()
+                });
+            }
+
+            cs.CalculateHomography();
+            
+            CoordinateSystem.WriteTransformation(new Uri(Path.GetDirectoryName(nvmFile) + @"\" + Path.GetFileName(nvmFile).Replace(".nvm",".tfm")), cs.Transformation);
+
+            cameraPositions = applyTransform(ref nvm);
+
+
+            var f = new IfcViewerWrapper(ifcFile, false);
+
+            var triangles = new List<Triangle>();
+
+            var p = IfcVisualizer.GetItems(f, false, elementName);
+
+            foreach (var item in p)
+            {
+                item.Mapper = new UvMapper((MeshGeometry3D)item.Geometry, p, item.IfcName, false)
+                {
+                    TextureFilename = textureDirectory + IfcViewerWrapper.GetValidPathName(item.IfcName) + ".jpg",
+                    TextureHeight = item.TextureHeight,
+                    TextureWidth = item.TextureWidth
+                };
+
+                item.Mapper.GenerateIndexes();
+
+                triangles.AddRange(item.Mapper.Triangles);
+            }
+
+            Dictionary<Triangle, List<CameraPosition>> dict;
+            Dictionary<CameraPosition, List<Triangle>> tris;
+
+            CheckFrustum(ref cameraPositions, ref triangles, out dict, out tris);
+
+            //var listDoGenerate = p.Where(q => q.IfcName.Contains("Column")).Where(q => !q.IfcName.Contains("251769")).ToList();
+            var listDoGenerate = p.OrderBy(q => q.IfcName).ToList();
+            
+            //var listDoGenerate = p.Where(q => q.IfcName.Contains("769")).ToList();
+
+            foreach (var item in listDoGenerate)
+            {
+                item.Mapper.GenerateSurfaceImageryFromCameraList(ref dict, ref tris, cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
+            }
 
             //foreach (var triangle in triangles)
             //{
@@ -345,6 +393,26 @@ namespace GygaxVisu.Method
             //    //item.Mapper.GenerateSurfaceImageryFromCameraList(cameraPositions, item.Mapper.Triangles, generateTextureFile, generateMaskFile);
             //    throw new NotImplementedException();
             //}
+        }
+
+        public static List<string> FindCommonImages(NViewMatch[] globalModel, NViewMatch[] localModel)
+        {
+            var list = new List<string>();
+
+            foreach (var nViewMatch in localModel)
+            {
+                foreach (var source in globalModel.Where(q => q.Transform != Matrix3D.Identity))
+                {
+                    var list1 = nViewMatch.CameraPositions.Select(i => Path.GetFileName(i.File).Split('.')[0]).ToList();
+                    var list2 = source.CameraPositions.Select(j => Path.GetFileName(j.File).Split('.')[0]).ToList();
+
+                    var commonFiles = list1.Intersect(list2).ToList();
+
+                    list.AddRange(commonFiles);
+                }
+            }
+
+            return list;
         }
 
         private void IterateDirectory()
@@ -375,6 +443,8 @@ namespace GygaxVisu.Method
 
         public void DrawTexture(string binfilename)
         {
+            Console.WriteLine("Start drawing texture with " + binfilename);
+
             string textureFilename = binfilename.Replace(".0.bin", ".jpg").Replace(".bin", ".jpg");
 
             IterateDirectory();
@@ -385,13 +455,19 @@ namespace GygaxVisu.Method
 
             Image<Bgr, Byte> image = new Image<Bgr, Byte>(recon.Width, recon.Height);
 
+
+            //var list = recon.Points.Where(q => q.Filename != null).Where(q => q.Filename.Contains("03920.JPG")).ToList();
+
             var filenames = recon.Points.Select(c => c.Filename).Where(d => d != null).Distinct();
 
+
             Parallel.ForEach(filenames, filename =>
+            //foreach (var filename in filenames)
             {
                 var path = Path.GetFullPath(filename);
 
-                var img = new Image<Bgr, Byte>(_fileAssignment[path]);
+                //var img = new Image<Bgr, Byte>(_fileAssignment[path]);
+                var img = new Image<Bgr, Byte>(path);
 
                 for (int i = 0; i < recon.Points.Length; i++)
                 {
@@ -403,14 +479,31 @@ namespace GygaxVisu.Method
                     var textureY = i / recon.Width;
 
                     if (img.Height > img.Width)
+                    {
+                        if (recon.Points[i].ImageX >= img.Height || recon.Points[i].ImageY >= img.Width)
+                        {
+                            Console.WriteLine("Image miss: ImageX " + recon.Points[i].ImageX + " ImageY " + recon.Points[i].ImageY);
+                            continue;
+                        }
+
                         image[textureY, textureX] = img[recon.Points[i].ImageX, recon.Points[i].ImageY];
+                    }
                     else
+                    {
+                        if (recon.Points[i].ImageY >= img.Height || recon.Points[i].ImageX >= img.Width)
+                        {
+                            Console.WriteLine("Image miss: ImageX " + recon.Points[i].ImageX + "ImageY " + recon.Points[i].ImageY);
+                            continue;
+                        }
+
                         image[textureY, textureX] = img[recon.Points[i].ImageY, recon.Points[i].ImageX];
+                    }
 
                 }
 
                 img.Dispose();
-            });
+            }
+            );
 
             image.Save(textureFilename);
         }

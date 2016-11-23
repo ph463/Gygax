@@ -438,13 +438,18 @@ namespace GygaxVisu
 
             var image = new ReconstructionContainer(TextureWidth, TextureHeight);
 
+            //var image = ReconstructionContainer.Read(TextureFilename.Replace(".jpg",".0.bin"));
+
             Stopwatch sw = new Stopwatch();
 
             sw.Start();
 
+            foreach (var mc in image.Points.Where(c => c.Filename != null).Where(c => c.Filename.Contains("2474")))
+                image.Points[mc.Index].UpToDate = false;
+
             //for (int i = 0; i < _geometry.TextureCoordinates.Count; i += 3)
-            //foreach (var triangle in triangles)
-            Parallel.ForEach(triangles, triangle =>
+            foreach (var triangle in triangles)
+            //Parallel.ForEach(triangles, triangle =>
             {
                 planeReconstructor.ReconstructRayTracer(
                     image,
@@ -452,7 +457,8 @@ namespace GygaxVisu
                     TextureWidth,
                     TextureHeight
                 );
-            });
+            //});
+            }
 
             if (generateMaskFile)
                 planeReconstructor.SaveMasks();

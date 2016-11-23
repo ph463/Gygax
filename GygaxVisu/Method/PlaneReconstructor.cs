@@ -288,6 +288,64 @@ namespace GygaxVisu
 
             var xStart = (int) Math.Floor(minX);
             var xEnd = (int) Math.Ceiling(maxX);
+            
+            var list = surfaceReconstruction.Points.Where(q => !q.UpToDate).ToList();
+
+            //Parallel.ForEach(list, item =>
+            ////foreach (var item in list)
+            //{
+            //    var x = item.Index%textureWidth;
+            //    var y = item.Index/textureWidth;
+
+            //    //Console.WriteLine(x + " " + y);
+
+            //    var m = Accord.Math.Matrix.Create(2, 3, 0.0);
+
+            //    m[0, 0] = vector1Image.X;
+            //    m[1, 0] = vector1Image.Y;
+
+            //    m[0, 1] = vector2Image.X;
+            //    m[1, 1] = vector2Image.Y;
+
+            //    m[0, 2] = x - u1.X;
+            //    m[1, 2] = y - u1.Y;
+
+            //    var r = new ReducedRowEchelonForm(m);
+
+            //    var a = (float) r.Result[0, 2];
+            //    var b = (float) r.Result[1, 2];
+
+            //    var result = a*vector1Image + b*vector2Image;
+            //    var result3D = a*vector13D + b*vector23D;
+
+            //    if (!PointInTriangle(u1 + result, u1, u2, u3))
+            //    {
+            //        return;
+            //    }
+
+            //    if (x < 0 || y < 0 || x >= surfaceReconstruction.Width || y >= surfaceReconstruction.Height)
+            //        return;
+
+            //    RayTracerPixelInfo pixelInfo = GetClosestImageMatching((p1 + result3D), t);
+
+            //    if (pixelInfo.Intersections.Count == 0)
+            //    {
+            //        //surfaceReconstruction[y, x] = new Bgr(255, 0, 0);
+            //        return;
+            //    }
+
+            //    //surfaceReconstruction[y, x] = GetBestPixel(pixelInfo.Intersections).Color;
+
+            //    //surfaceReconstruction.Points[y, x] = GetBestPixel(pixelInfo.Intersections);
+            //    //surfaceReconstruction.Points[y * surfaceReconstruction.Width + x] = GetBestPixel(pixelInfo.Intersections);
+
+            //    var bestPixel = GetBestPixel(pixelInfo.Intersections);
+            //    bestPixel.UpToDate = true;
+            //    surfaceReconstruction.Points[y*textureWidth + x] = bestPixel;
+            //});
+
+
+            //}
 
             Parallel.For(yStart, yEnd, y =>
             //for (int y = yStart; y <= yEnd; y++)
@@ -339,6 +397,12 @@ namespace GygaxVisu
                     surfaceReconstruction.Points[y*textureWidth + x] = bestPixel;
                 }
             });
+            //}
+        }
+
+        private void ExtractPixel(Vector2 vector1Image, Vector2 vector2Image, int x, int y, Vector2 u1, Vector2 u2, Vector2 u3, Vector3D vector13D, Vector3D vector23D)
+        {
+
         }
 
 
@@ -350,20 +414,24 @@ namespace GygaxVisu
             if (ordered.Any())
                 return ordered.OrderBy(x => x.PixelSize).First();
 
-            //Second, angle < 60 deg and smallest pixel
-            ordered = candidates.Where(x => x.Angle > 0.334 * Math.PI);
-
-            if (ordered.Any())
-                return ordered.OrderBy(x => x.PixelSize).First();
-
-            //Third, angle < 60 deg and smallest pixel
-            ordered = candidates.Where(x => x.Angle > 0.4 * Math.PI);
-
-            if (ordered.Any())
-                return ordered.OrderBy(x => x.PixelSize).First();
-
-            //Finally, pick the smallest pixel
+            //Get steepest angle
             return candidates.OrderByDescending(x => x.Angle).First();
+
+
+            ////Second, angle < 60 deg and smallest pixel
+            //ordered = candidates.Where(x => x.Angle > 0.334 * Math.PI);
+
+            //if (ordered.Any())
+            //    return ordered.OrderBy(x => x.PixelSize).First();
+
+            ////Third, angle < 60 deg and smallest pixel
+            //ordered = candidates.Where(x => x.Angle > 0.4 * Math.PI);
+
+            //if (ordered.Any())
+            //    return ordered.OrderBy(x => x.PixelSize).First();
+
+            ////Finally, pick the smallest pixel
+            //return candidates.OrderByDescending(x => x.Angle).First();
         }
 
 
@@ -414,6 +482,9 @@ namespace GygaxVisu
                 public int CameraId;
                 [ProtoMember(8)]
                 public bool Intersects;
+
+                public bool UpToDate;
+                public int Index;
             }
 
             public Bgr Color;
@@ -627,10 +698,13 @@ namespace GygaxVisu
             ximg = ximg / cameraPosition.ImageDiagonal;
             yimg = yimg / cameraPosition.ImageDiagonal;
 
-            var pCorrected = Distort(new []{ximg, yimg}, cameraPosition.RadialDistortion);
+            //var pCorrected = Distort(new []{ximg, yimg}, cameraPosition.RadialDistortion);
 
-            ximg = (pCorrected[0] * cameraPosition.ImageDiagonal + cameraPosition.Width / 2.0);
-            yimg = (pCorrected[1] * cameraPosition.ImageDiagonal + cameraPosition.Height / 2.0);
+            //ximg = (pCorrected[0] * cameraPosition.ImageDiagonal + cameraPosition.Width / 2.0);
+            //yimg = (pCorrected[1] * cameraPosition.ImageDiagonal + cameraPosition.Height / 2.0);
+
+            ximg = (ximg * cameraPosition.ImageDiagonal + cameraPosition.Width / 2.0);
+            yimg = (yimg * cameraPosition.ImageDiagonal + cameraPosition.Height / 2.0);
 
             ximg = Math.Round(ximg);
             yimg = Math.Round(yimg);
@@ -1212,6 +1286,12 @@ namespace GygaxVisu
                 {
                     throw e;
                 }
+            }
+
+            for (int i = 0; i < r.Points.Length; i++)
+            {
+                r.Points[i].UpToDate = true;
+                r.Points[i].Index = i;
             }
 
             return r;
