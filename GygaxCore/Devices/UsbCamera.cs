@@ -23,7 +23,7 @@ namespace GygaxCore.Devices
         private static List<int> _openCameras;
         private int _cameraIndex;
 
-        public UsbCamera(int cameraIndex)
+        public UsbCamera(int cameraIndex):base()
         {
             if (_openCameras == null)
                 _openCameras = new ExposedArrayList<int>();

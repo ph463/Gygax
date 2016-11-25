@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ using System.Windows.Media;
 using GygaxCore.DataStructures;
 using GygaxCore.Interfaces;
 using GygaxCore.Processors;
+using NLog;
 using Binding = System.Windows.Data.Binding;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
+using Image = GygaxCore.DataStructures.Image;
 
 namespace GygaxVisu.Controls
 {
@@ -164,44 +167,58 @@ namespace GygaxVisu.Controls
             myControl.OnPropertyChanged(e.NewValue, new PropertyChangedEventArgs("DataContext"));
         }
 
-        //private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    //e.GetPosition();
-        //    var pos = e.GetPosition(Image);
+        private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //e.GetPosition();
+            var pos = e.GetPosition(ImageCtrl);
 
-        //    var image = (Image)DataContext;
+            var image = (Image)DataContext;
 
-        //    System.Drawing.Image theImage = new System.Drawing.Bitmap(image.File.LocalPath);
+            System.Drawing.Image theImage = new System.Drawing.Bitmap(image.File.LocalPath);
 
-        //    // Get the PropertyItems property from image.
-        //    PropertyItem[] propItems = theImage.PropertyItems;
+            // Get the PropertyItems property from image.
+            PropertyItem[] propItems = theImage.PropertyItems;
 
-        //    var t = propItems.Where(p => p.Id == 0x0112).First();
+            PropertyItem t;
 
-        //    //https://msdn.microsoft.com/en-us/library/windows/desktop/ms534416(v=vs.85).aspx
+            try
+            {
+                t = propItems.Where(p => p.Id == 0x0112).First();
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
 
-        //    var x = 0.0;
-        //    var y = 0.0;
+            //https://msdn.microsoft.com/en-us/library/windows/desktop/ms534416(v=vs.85).aspx
 
-        //    switch (t.Value[0])
-        //    {
-        //        case 1:
-        //            x = pos.X / Image.ActualWidth * image.CvSource.Bitmap.Width;
-        //            y = pos.Y / Image.ActualHeight * image.CvSource.Bitmap.Height;
-        //            break;
-        //        case 8:
-        //            x = image.CvSource.Bitmap.Height - pos.Y / Image.ActualHeight * image.CvSource.Bitmap.Height;
-        //            y = pos.X / Image.ActualWidth * image.CvSource.Bitmap.Width;
-        //            break;
-        //        default:
-        //            throw new NotImplementedException();
-        //    }
-            
+            var x = 0.0;
+            var y = 0.0;
 
-        //    var txt = image.Filename + "," + x + "," + y + ",";
-            
-        //    Console.WriteLine(txt);
-        //    Clipboard.SetText(txt);
-        //}
+            switch (t.Value[0])
+            {
+                case 1:
+                    x = pos.X / ImageCtrl.ActualWidth * image.CvSource.Bitmap.Width;
+                    y = pos.Y / ImageCtrl.ActualHeight * image.CvSource.Bitmap.Height;
+                    break;
+                case 6:
+                    x = pos.Y / ImageCtrl.ActualHeight * image.CvSource.Bitmap.Height;
+                    y = image.CvSource.Bitmap.Width - pos.X / ImageCtrl.ActualWidth * image.CvSource.Bitmap.Width;
+                    break;
+                case 8:
+                    x = image.CvSource.Bitmap.Height - pos.Y / ImageCtrl.ActualHeight * image.CvSource.Bitmap.Height;
+                    y = pos.X / ImageCtrl.ActualWidth * image.CvSource.Bitmap.Width;
+                    break;
+                default:
+                    LogManager.GetCurrentClassLogger().Warn("Cannot extract picture orientation");
+                    break;
+            }
+
+
+            var txt = Path.GetFileName(image.Location) + "," + x + "," + y + ",";
+
+            Console.WriteLine(txt);
+            System.Windows.Clipboard.SetText(txt);
+        }
     }
 }

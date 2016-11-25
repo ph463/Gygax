@@ -73,6 +73,16 @@ namespace GygaxCore.DataStructures
                 handler(this, new PropertyChangedEventArgs(name));
             }
         }
+
+        public Streamable()
+        {
+        }
+
+        public Streamable(string filename)
+        {
+            Location = filename;
+            Name = Path.GetFileNameWithoutExtension(filename);
+        }
         
         /// <summary>
         /// Delete a GDI object
@@ -91,7 +101,9 @@ namespace GygaxCore.DataStructures
         /// <returns>The equivalent BitmapSource</returns>
         public BitmapSource ToBitmapSource(IImage image)
         {
-            ImageScale = 1000.0/image.Bitmap.Width;
+            //ImageScale = 1.0/image.Bitmap.Width;
+
+            ImageScale = 1;
 
             var size = new Size((int)Math.Ceiling(image.Bitmap.Width * ImageScale), (int)Math.Ceiling(image.Bitmap.Height * ImageScale));
 

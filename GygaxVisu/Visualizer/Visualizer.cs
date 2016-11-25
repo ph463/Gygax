@@ -31,6 +31,11 @@ namespace GygaxVisu.Visualizer
                 return NViewMatchVisualizer.GetModels((NViewMatch)data);
             }
 
+            if (t == typeof(NViewMatch[]))
+            {
+                return NViewMatchVisualizer.GetModels((NViewMatch[])data);
+            }
+
             if (t == typeof(List<CameraPosition>))
             {
                 return NViewMatchVisualizer.GetModels(new NViewMatch()

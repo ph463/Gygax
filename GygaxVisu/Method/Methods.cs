@@ -315,8 +315,6 @@ namespace GygaxVisu.Method
         public static void CalculateTexture(
             string nvmFile, string ifcFile, string textureDirectory, string[] elementName, bool generateTextureFile = true, bool generateMaskFile = false)
         {
-
-
             var nvm = NViewMatchLoader.OpenMultiple(new Uri(nvmFile), false);
             var nvmGlobal = NViewMatchLoader.OpenMultiple(new Uri(@"Z:\06. Data\Bridges\Philipp\Bridge 1\JustImages\sparse.nvm"), false);
 
@@ -374,9 +372,9 @@ namespace GygaxVisu.Method
             CheckFrustum(ref cameraPositions, ref triangles, out dict, out tris);
 
             //var listDoGenerate = p.Where(q => q.IfcName.Contains("Column")).Where(q => !q.IfcName.Contains("251769")).ToList();
-            var listDoGenerate = p.OrderBy(q => q.IfcName).ToList();
+            //var listDoGenerate = p.OrderBy(q => q.IfcName).ToList();
             
-            //var listDoGenerate = p.Where(q => q.IfcName.Contains("769")).ToList();
+            var listDoGenerate = p.Where(q => q.IfcName.Contains("823")).ToList();
 
             foreach (var item in listDoGenerate)
             {

@@ -28,6 +28,9 @@ namespace PclWrapper {
 		float d3;
 	};
 
+	//void RegularizeDistribution(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudIn, pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudOut);
+	//void calculateICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud1, pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud2, float* t);
+
 	public ref class PCD
 	{
 	public:
@@ -42,7 +45,6 @@ namespace PclWrapper {
 
 		//array<Points>^ Process4(array<Points>^ cloud1, array<Points>^ cloud2);
 		void Process4(array<Points>^ cloud1, array<Points>^ cloud2, array<float>^ transformation);
-
 
 	private:
 		array<Points>^ convertPointcloudToPoints(pcl::PointCloud<pcl::PointXYZRGB>::Ptr p);

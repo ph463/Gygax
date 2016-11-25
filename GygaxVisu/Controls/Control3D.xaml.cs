@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using GygaxCore.Interfaces;
 using GygaxVisu.Helpers;
 using HelixToolkit.Wpf.SharpDX;
+using NLog;
 using SharpDX;
 
 namespace GygaxVisu.Controls
@@ -179,6 +182,22 @@ namespace GygaxVisu.Controls
                 myControl.OnPropertyChanged(myControl.StreamableObject.Data,
                     new PropertyChangedEventArgs("DataContext"));
             }
+        }
+
+        private void Viewport_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left)
+                return;
+
+            var hits = Viewport.FindHits(e.GetPosition(this));
+
+            if (hits.Count == 0) return;
+
+            var txt = hits[0].PointHit.X + "," + hits[0].PointHit.Y + "," + hits[0].PointHit.Z;
+            LogManager.GetCurrentClassLogger().Info("Hit at " + txt);
+
+            Console.WriteLine(txt);
+            System.Windows.Clipboard.SetText(txt);
         }
     }
 }

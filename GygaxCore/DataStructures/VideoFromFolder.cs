@@ -40,7 +40,7 @@ namespace GygaxCore.DataStructures
             _stop = true;
         }
 
-        public VideoFromFolder()
+        public VideoFromFolder():base()
         {
             _thread = new Thread(WorkThreadFunction);
             _thread.Name = "VideoFromFolder";
