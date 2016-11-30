@@ -88,39 +88,6 @@ namespace GygaxCore.DataStructures
             FindOptimalRotation();
             FindTranslation();
             FindScaling();
-
-            var tr = new Transform3DGroup();
-
-            tr.Children.Add(
-                new RotateTransform3D(new QuaternionRotation3D(new System.Windows.Media.Media3D.Quaternion()
-                {
-                    X = Rotation.X,
-                    Y = Rotation.Y,
-                    Z = Rotation.Z,
-                    W = Rotation.W
-                })));
-
-            tr.Children.Add(new TranslateTransform3D(new Vector3D(
-                Translation.X,
-                Translation.Y,
-                Translation.Z
-                )));
-
-            tr.Children.Add(new TranslateTransform3D(
-                -Centroid.ParentCoordinateSystem.X,
-                -Centroid.ParentCoordinateSystem.Y,
-                -Centroid.ParentCoordinateSystem.Z
-                ));
-
-            tr.Children.Add(new ScaleTransform3D(1 / Scaling, 1 / Scaling, 1 / Scaling));
-
-            tr.Children.Add(new TranslateTransform3D(
-                Centroid.ParentCoordinateSystem.X,
-                Centroid.ParentCoordinateSystem.Y,
-                Centroid.ParentCoordinateSystem.Z
-                ));
-
-            Transformation = tr.Value;
         }
 
         private float FindError()

@@ -24,15 +24,6 @@
                 <MenuItem Header="_Clear workspace" Click="ClearWorkspace_OnClick"/>
             </MenuItem>
             <MenuItem Header="_Processing">
-                <MenuItem Header="_Calculate correction" Click="Correction_OnClick"></MenuItem>
-                <MenuItem Header="_Correspondence matching + ICP" Click="ColumnIcp_OnClick"></MenuItem>
-                <MenuItem Header="_Correspondence matching" Click="ColumnNoIcp_OnClick"></MenuItem>
-                <MenuItem Header="_Generate Texture" Click="CalculateTexture_OnClick"></MenuItem>
-                <MenuItem Header="_Generate all Textures" Click="GenerateAllTextures_OnClick"></MenuItem>
-                <MenuItem Header="_Build Masks" Click="BuildMasks_OnClick"></MenuItem>
-                <MenuItem Header="_Extract form Image Points" Click="ExtractImagePoints_OnClick"></MenuItem>
-                <MenuItem Header="_Draw Textures" Click="DrawTextures_OnClick"></MenuItem>
-                <MenuItem Header="_Export Object" Click="ObjectExport_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="Sorry, no help yet!" IsEnabled="False"/>

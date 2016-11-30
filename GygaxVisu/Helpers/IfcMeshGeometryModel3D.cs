@@ -15,7 +15,6 @@ namespace GygaxVisu
         public string IfcGlobalId;
         public int TextureWidth;
         public int TextureHeight;
-        public UvMapper Mapper;
         public TreeNode<TreeElement> IfcTreeNode { get; set; }
     }
 }

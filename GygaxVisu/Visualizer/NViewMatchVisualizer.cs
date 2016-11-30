@@ -13,21 +13,9 @@ namespace GygaxVisu.Visualizer
 {
     public class NViewMatchVisualizer:Visualizer
     {
-        public static GeometryModel3D[] GetModels(NViewMatch[] nvm)
-        {
-            List<GeometryModel3D> models = new List<GeometryModel3D>();
-
-            foreach (var nViewMatch in nvm)
-            {
-                models.AddRange(GetModels(nViewMatch));
-            }
-
-            return models.ToArray();
-        }
-
         public static GeometryModel3D[] GetModels(NViewMatch nvm)
         {
-            var showCameras = false;
+            var showCameras = true;
 
             var tg = new MatrixTransform3D(nvm.Transform);
 
