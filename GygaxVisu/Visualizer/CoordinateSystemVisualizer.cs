@@ -32,6 +32,8 @@ namespace GygaxVisu.Visualizer
                     AmbientColor = new Color(LUT.Colors[i, 0], LUT.Colors[i, 1], LUT.Colors[i, 2]),
                     DiffuseColor = new Color(LUT.Colors[i, 0], LUT.Colors[i, 1], LUT.Colors[i, 2])
                 });
+
+                m.Name = "Correspondence" + (i - 1) + "LocalCoordinateSystem";
                 m.Transform = tg;
                 models.Add(m);
 
@@ -40,6 +42,8 @@ namespace GygaxVisu.Visualizer
                     AmbientColor = new Color(LUT.Colors[i, 0]-5, LUT.Colors[i, 1]-5, LUT.Colors[i, 2]-5),
                     DiffuseColor = new Color(LUT.Colors[i, 0]-5, LUT.Colors[i, 1]-5, LUT.Colors[i, 2]-5)
                 });
+
+                n.Name = "Correspondence" + (i - 1) + "ParentCoordinateSystem";
                 models.Add(n);
 
                 i++;

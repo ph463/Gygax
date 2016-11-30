@@ -19,6 +19,7 @@
             CoordinateSystemLabelForeground="White"
             UseDefaultGestures="True"
             Visibility="Hidden"
+            MouseDown="Viewport_OnMouseDown"
             >
         </hx:Viewport3DX>
     </Grid>

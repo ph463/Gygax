@@ -33,6 +33,24 @@ array<PclWrapper::Points>^ PclWrapper::PCD::LoadPointcloud(String^ Name)
 	return convertPointcloudToPoints(cloud);
 }
 
+#pragma unmanaged
+void RegularizeDistribution(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudIn, pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudOut)
+{
+	pcl::PCLPointCloud2::Ptr pointcloud3(new pcl::PCLPointCloud2());
+
+	pcl::toPCLPointCloud2(*pointcloudIn, *pointcloud3);
+
+	pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+	sor.setInputCloud(pointcloud3);
+	sor.setLeafSize(0.5f, 0.5f, 0.5f);
+
+	pcl::PCLPointCloud2::Ptr cloud_filtered(new pcl::PCLPointCloud2());
+	sor.filter(*cloud_filtered);
+
+	pcl::fromPCLPointCloud2(*cloud_filtered, *pointcloudOut);
+}
+#pragma managed
+
 void PclWrapper::PCD::SavePointcloud(char* Name, array<Points>^ cloud)
 {
 	pcl::io::savePCDFileASCII(Name, *convertPointsToPointcloud(cloud));
@@ -79,11 +97,12 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr PclWrapper::PCD::convertPointsToPointclou
 
 array<PclWrapper::Points>^ PclWrapper::PCD::Process1(array<Points>^ cloud)
 {
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud = convertPointsToPointcloud(cloud);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudIn = convertPointsToPointcloud(cloud);
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloudOut(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-	// Do your processing here
+	RegularizeDistribution(pointcloudIn, pointcloudOut);
 
-	return convertPointcloudToPoints(pointcloud);
+	return convertPointcloudToPoints(pointcloudOut);
 }
 
 array<PclWrapper::Points>^ PclWrapper::PCD::Process2(array<Points>^ cloud)
@@ -108,9 +127,6 @@ array<PclWrapper::Points>^ PclWrapper::PCD::Process3(array<Points>^ cloud)
 void calculateICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud1, pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud2, float* t)
 {
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud4(new pcl::PointCloud<pcl::PointXYZRGB>());
-
-	//pcl::PCLPointCloud2::Ptr pointcloud3;
-	//pcl::PCLPointCloud2 pointcloud3;
 
 	pcl::PCLPointCloud2::Ptr pointcloud3(new pcl::PCLPointCloud2());
 
@@ -168,3 +184,4 @@ void PclWrapper::PCD::Process4(array<Points>^ cloud1, array<Points>^ cloud2, arr
 
 	calculateICP(pointcloud1, pointcloud2, cp);
 }
+

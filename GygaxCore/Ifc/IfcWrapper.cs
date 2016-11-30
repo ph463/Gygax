@@ -302,18 +302,25 @@ namespace GygaxCore.Ifc
         public object Data { get; set; }
 
 
-        public IfcViewerWrapper(string sPath)
+        public IfcViewerWrapper(string sPath, bool multiThreading = true)
         {
             Location = sPath;
             Name = "Ifc File" + Path.GetFileName(sPath).Split('.').First();
 
             logger.Info("Loading ifc file " + Location);
 
-            var thread = new Thread(LoadThreadFunction)
+            if (multiThreading)
             {
-                Name = "Ifc loader " + Path.GetFileName(Location)
-            };
-            thread.Start();
+                var thread = new Thread(LoadThreadFunction)
+                {
+                    Name = "Ifc loader " + Path.GetFileName(Location)
+                };
+                thread.Start();
+            }
+            else
+            {
+                LoadThreadFunction();
+            }
         }
 
         private void LoadThreadFunction()

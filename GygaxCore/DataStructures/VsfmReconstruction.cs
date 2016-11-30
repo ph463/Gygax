@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace GygaxCore.DataStructures
 {
@@ -13,13 +14,14 @@ namespace GygaxCore.DataStructures
             {
                 _file = value;
                 Location = value.LocalPath;
-                Data = NViewMatchLoader.Open(_file, false);
+                Data = NViewMatchLoader.OpenMultiple(_file, false);
+                Name = Path.GetFileNameWithoutExtension(Location);
             }
         }
 
         private VsfmReconstruction() {}
 
-        public VsfmReconstruction(string filename)
+        public VsfmReconstruction(string filename):base()
         {
             File = new Uri(filename);
         }
@@ -30,13 +32,19 @@ namespace GygaxCore.DataStructures
 
             var b = NViewMatchLoader.OpenMultiple(new Uri(filename), false);
 
+            var i = 0;
+
             foreach (var nViewMatch in b)
             {
                 a.Add(new VsfmReconstruction()
                 {
                     _file = new Uri(filename),
-                    Data = nViewMatch
+                    Data = nViewMatch,
+                    Location = filename,
+                    Name = Path.GetFileNameWithoutExtension(filename) + " " + i
                 });
+
+                i++;
             }
 
             return a.ToArray();

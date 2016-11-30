@@ -14,7 +14,7 @@ namespace GygaxCore.DataStructures
 
         private double _framesPerSecond;
 
-        public Video(string filename)
+        public Video(string filename):base()
         {
             Location = filename;
             _capture = new Capture(filename);
