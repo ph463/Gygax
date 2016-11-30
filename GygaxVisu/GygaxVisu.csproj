@@ -313,6 +313,9 @@
     <Resource Include="Resources\CIT logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Controls\NlogViewer.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
