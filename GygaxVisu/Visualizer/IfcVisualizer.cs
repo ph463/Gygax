@@ -115,30 +115,7 @@ namespace GygaxVisu.Visualizer
                     LogManager.GetCurrentClassLogger().Info("Can not assign name " + model3D.IfcName + "to IFC element");
                 }
 
-
-                model3D.Mapper = new UvMapper((MeshGeometry3D)model3D.Geometry, modelList.ToArray())
-                {
-                    TextureFilename = Path.GetDirectoryName(model.Location) + @"\..\Textures\" + IfcViewerWrapper.GetValidPathName(model3D.IfcName) + ".jpg",
-                    TextureHeight = model3D.TextureHeight,
-                    TextureWidth = model3D.TextureWidth
-                };
-
-                if (loadTexture && File.Exists(model3D.Mapper.TextureFilename))
-                {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(model3D.Mapper.TextureFilename);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-
-                    model3D.Material = new PhongMaterial()
-                    {
-                        AmbientColor = new SharpDX.Color4(0f, 0f, 0f, 1f),
-                        DiffuseColor = new SharpDX.Color4(1f, 1f, 1f, 1f),
-                        DiffuseMap = bitmap
-                    };
-                }
-                else if (true)
+                if (true)
                 {
                     var returnColor = new SharpDX.Color3(.8f, .8f, .8f);
 
@@ -282,11 +259,8 @@ namespace GygaxVisu.Visualizer
                     geometry.Normals.Add(normals[(int)element.indicesForFaces[i]]);
 
                     //just needs to be filled with something
-                    //geometry.TextureCoordinates.Add(new Vector2(0,0));
+                    geometry.TextureCoordinates.Add(new Vector2(0,0));
                 }
-
-                var uvm = new UvMapper(geometry, modelList.ToArray());
-                geometry.TextureCoordinates = uvm.GenerateIndexes();
 
                 modelList.Add(new IfcMeshGeometryModel3D()
                 {

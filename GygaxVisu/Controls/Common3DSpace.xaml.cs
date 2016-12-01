@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -188,9 +187,6 @@ namespace GygaxVisu.Controls
 
             var txt = hits[0].PointHit.X + "," + hits[0].PointHit.Y + "," + hits[0].PointHit.Z;
             LogManager.GetCurrentClassLogger().Info("Hit at " + txt);
-            
-            Console.WriteLine(txt);
-            System.Windows.Clipboard.SetText(txt);
 
             try
             {

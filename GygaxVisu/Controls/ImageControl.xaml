@@ -9,7 +9,7 @@
              >
     <Grid>
         <Border x:Name="RecordingFrame" BorderThickness="0" BorderBrush="Red">
-            <Image x:Name="ImageCtrl" Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform" MouseDown="UIElement_OnMouseDown" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+        <Image Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform"/>
         </Border>
     </Grid>
 </UserControl>
