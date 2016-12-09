@@ -81,6 +81,9 @@ namespace GygaxVisu.Visualizer
 
         private static void addSubtree(ref TreeViewItem viewTree, TreeNode<TreeElement> ifcTree)
         {
+            if (ifcTree == null || ifcTree.Children == null)
+                return;
+
             foreach (var child in ifcTree.Children)
             {
                 var t = new TreeViewItem()

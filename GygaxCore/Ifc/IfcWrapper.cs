@@ -353,7 +353,7 @@ namespace GygaxCore.Ifc
                         if (s.Contains("IFC4") == true)
                         {
                             IfcEngine.x64.sdaiCloseModel(ifcModel);
-                            ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, Location, "IFC4.exp");
+                            ifcModel = IfcEngine.x64.sdaiOpenModelBN(0, Location, "Ifc/IFC4.exp");
 
                             if (ifcModel != 0)
                                 textReader = new XmlTextReader(xmlSettings_IFC4);
