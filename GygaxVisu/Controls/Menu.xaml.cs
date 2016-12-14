@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,11 +37,12 @@ namespace GygaxVisu.Controls
         {
             string[] filters = new[]
             {
-                "All Files|*.jpg;*.jpeg;*.png;*.gif;*.tif;*.bmp*.avi;*.wmv;*.mp4;*.mpg;*.mkv;*.gyg;*.pcd;*.js;*.nvm;*.ifc;*.txt",
+                "All Files|*.jpg;*.jpeg;*.png;*.gif;*.tif;*.bmp*.avi;*.wmv;*.mp4;*.mpg;*.mkv;*.gyg;*.pcd;*.js;*.nvm;*.ifc;*.obj;*.txt",
                 "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.tif;*.bmp",
                 "Video Files|*.avi;*.wmv;*.mp4;*.mpg;*.mkv;*.gyg",
                 "Pointcloud Files|*.pcd;*.js;*.nvm",
                 "BIM Files|*.ifc",
+                "Wavefront Object Files|*.obj",
                 "Camera Position Files|*.txt"
             };
 
@@ -91,6 +93,17 @@ namespace GygaxVisu.Controls
 
                 case "ifc":
                     _viewModel.Items.Add(new IfcViewerWrapper(res.FileName));
+                    break;
+
+                case "obj":
+                    var objReader = new HelixToolkit.Wpf.ObjReader();
+                    var group = objReader.Read(res.FileName);
+                    _viewModel.Items.Add(new Streamable()
+                    {
+                        Data = group,
+                        Location = res.FileName,
+                        Name = Path.GetFileNameWithoutExtension(res.FileName)
+                    });
                     break;
 
                 case "txt":

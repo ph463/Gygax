@@ -37,6 +37,7 @@ namespace GygaxCore.Devices
             var thread = new Thread(WorkThreadFunction);
 
             Location = "UsbCamera " + cameraIndex;
+            Name = Location;
 
             thread.Name = Location;
             thread.Start();
@@ -59,6 +60,7 @@ namespace GygaxCore.Devices
 
         public override void Close()
         {
+            base.Close();
             _stop = true;
         }
 

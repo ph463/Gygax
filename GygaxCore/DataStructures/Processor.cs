@@ -6,8 +6,6 @@ namespace GygaxCore.DataStructures
 {
     public abstract class Processor : Streamable, IProcessor
     {
-        public override void Close() { }
-
         private IStreamable _source;
         public IStreamable Source
         {

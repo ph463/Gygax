@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media;
+using GygaxCore.DataStructures;
 
 namespace GygaxCore.Interfaces
 {
@@ -18,8 +19,12 @@ namespace GygaxCore.Interfaces
 
         void Save();
 
+        void Save(string filename);
+
         string Location { get; }
 
         string Name { get; }
+        
+        event Streamable.ClosingEvent OnClosing;
     }
 }

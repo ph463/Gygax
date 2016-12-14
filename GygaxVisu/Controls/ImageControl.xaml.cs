@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using GygaxCore.DataStructures;
 using GygaxCore.Interfaces;
 using GygaxCore.Processors;
+using NLog;
 using Binding = System.Windows.Data.Binding;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
@@ -27,9 +29,9 @@ namespace GygaxVisu.Controls
     public partial class ImageControl : UserControl
     {
         public static readonly DependencyProperty MyDataContextProperty = DependencyProperty.Register("MyDataContext",
-                                            typeof(Object),
-                                            typeof(ImageControl),
-                                            new PropertyMetadata(DataContextChanged));
+            typeof(Object),
+            typeof(ImageControl),
+            new PropertyMetadata(DataContextChanged));
 
         private bool _controlHidden = false;
 
@@ -37,7 +39,7 @@ namespace GygaxVisu.Controls
         {
             InitializeComponent();
             SetBinding(MyDataContextProperty, new Binding());
-            
+
             InitializeContextMenu();
         }
 
@@ -47,23 +49,78 @@ namespace GygaxVisu.Controls
 
             var hideItem = new MenuItem()
             {
-                Header = "Hide"
+                Header = "Minimise"
             };
 
-            hideItem.Click += delegate (object sender, RoutedEventArgs args)
+            hideItem.Click += delegate(object sender, RoutedEventArgs args)
             {
                 _controlHidden = !_controlHidden;
 
                 if (_controlHidden)
-                    Height = 10;
+                {
+                    Image.Visibility = Visibility.Collapsed;
+                    Label.Visibility = Visibility.Visible;
+                }
                 else
                 {
-                    Height = Double.NaN; // Auto height
+                    Image.Visibility = Visibility.Visible;
+                    Label.Visibility = Visibility.Collapsed;
                 }
                 hideItem.IsChecked = _controlHidden;
             };
 
             ContextMenu.Items.Add(hideItem);
+
+            var RecordItem = new MenuItem
+            {
+                Header = "Save"
+            };
+
+            RecordItem.Click += delegate(object sender, RoutedEventArgs args)
+            {
+                Save((IStreamable)DataContext);
+            };
+
+            ContextMenu.Items.Add(RecordItem);
+
+            var InfoItem = new MenuItem
+            {
+                Header = "Info"
+            };
+
+            ContextMenu.Opened += delegate(object sender, RoutedEventArgs args)
+            {
+                InfoItem.Items.Clear();
+
+                try
+                {
+                    InfoItem.Items.Add(new MenuItem
+                    {
+                        Header = "Name: " + ((IStreamable)DataContext).Name
+                    });
+
+                    InfoItem.Items.Add(new MenuItem
+                    {
+                        Header = "Location: " + ((IStreamable)DataContext).Location
+                    });
+                }
+                catch (Exception) { }
+
+            };
+
+            ContextMenu.Items.Add(InfoItem);
+
+            var CloseItem = new MenuItem
+            {
+                Header = "Close"
+            };
+
+            CloseItem.Click += delegate (object sender, RoutedEventArgs args)
+            {
+                ((IStreamable)DataContext).Close();
+            };
+
+            ContextMenu.Items.Add(CloseItem);
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -72,85 +129,56 @@ namespace GygaxVisu.Controls
             {
                 case "Data":
                 case "DataContext":
-
-                    AddContextMenuRecord(sender);
                     break;
             }
         }
 
         private GygaxVideoWriter videoWriter;
 
-        private void AddContextMenuRecord(object sender)
+        private void Save(IStreamable sender)
         {
-            if (sender is IVideo || sender is ICamera)
+            if (sender is IImage)
             {
-                var item = new MenuItem
-                {
-                    Header = "Recording",
-                };
+                var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog.FileName = "*";
+                saveFileDialog.DefaultExt = "jpg";
+                saveFileDialog.ValidateNames = true;
 
-                ContextMenu.Items.Add(item);
+                saveFileDialog.Filter = "Image File (.jpg)|*.jpg";
 
-                var startItem = new MenuItem
-                {
-                    Header = "Start recording",
-                };
+                DialogResult result = saveFileDialog.ShowDialog();
 
-                startItem.Click += delegate(object o, RoutedEventArgs args)
+                if (!(result == DialogResult.OK)) // Test result.
                 {
-                    if (videoWriter == null)
+                    return;
+                }
+                
+                sender.Save(saveFileDialog.FileName);
+            }
+            else if (sender is IVideo || sender is ICamera)
+            {
+                if (videoWriter == null)
+                {
+                    var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                    saveFileDialog.FileName = "*";
+                    saveFileDialog.DefaultExt = "gyg";
+                    saveFileDialog.ValidateNames = true;
+
+                    saveFileDialog.Filter = "Gygax Video (.gyg)|*.gyg";
+
+                    DialogResult result = saveFileDialog.ShowDialog();
+
+                    if (!(result == DialogResult.OK)) // Test result.
                     {
-                        var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-                        saveFileDialog.FileName = "*";
-                        saveFileDialog.DefaultExt = "gyg";
-                        saveFileDialog.ValidateNames = true;
-
-                        saveFileDialog.Filter = "Gygax Video (.gyg)|*.gyg";
-
-                        DialogResult result = saveFileDialog.ShowDialog();
-
-                        if (!(result == DialogResult.OK)) // Test result.
-                        {
-                            return;
-                        }
-
-                        videoWriter = new GygaxVideoWriter(saveFileDialog.FileName);
-                        videoWriter.Source = (IStreamable)sender;
+                        return;
                     }
 
-                    videoWriter.Record = !videoWriter.Record;
-                    startItem.IsChecked = videoWriter.Record;
+                    videoWriter = new GygaxVideoWriter(saveFileDialog.FileName);
+                    videoWriter.Source = (IStreamable)sender;
 
-                    if (videoWriter.Record)
-                    {
-                        startItem.Header = "Pause recording";
-                        RecordingFrame.BorderThickness = new Thickness(5);
-                    }
-                    else
-                    {
-                        startItem.Header = "Continue recording";
-                        RecordingFrame.BorderThickness = new Thickness(0);
-                    }
-                };
-
-
-                item.Items.Add(startItem);
-
-                var stopItem = new MenuItem
-                {
-                    Header = "Stop recording",
-                };
-
-                stopItem.Click += delegate(object o, RoutedEventArgs args)
-                {
-                    videoWriter.Close();
-                    videoWriter = null;
-                    startItem.IsChecked = false;
-                    startItem.Header = "Start recording";
-                    RecordingFrame.BorderThickness = new Thickness(0);
-                };
-
-                item.Items.Add(stopItem);
+                    RecordingButton.Visibility = Visibility.Visible;
+                    StopRecordingButton.Visibility = Visibility.Visible;
+                }
             }
         }
 
@@ -164,6 +192,35 @@ namespace GygaxVisu.Controls
             myControl.OnPropertyChanged(e.NewValue, new PropertyChangedEventArgs("DataContext"));
         }
 
+        private void RecordingButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (videoWriter == null)
+                return;
+
+            videoWriter.Record = !videoWriter.Record;
+
+            if (videoWriter.Record)
+            {
+                LogManager.GetCurrentClassLogger().Info("Recording started ("+videoWriter.Filename+")");
+            }
+            else
+            {
+                LogManager.GetCurrentClassLogger().Info("Recording paused (" + videoWriter.Filename+")");
+            }
+        }
+
+        private void StopRecordingButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            videoWriter.Close();
+
+            LogManager.GetCurrentClassLogger().Info("Recording finished (" + videoWriter.Filename + ")");
+
+            videoWriter = null;
+
+            RecordingButton.Visibility = Visibility.Collapsed;
+            StopRecordingButton.Visibility = Visibility.Collapsed;
+        }
+        
         //private void UIElement_OnMouseDown(object sender, MouseButtonEventArgs e)
         //{
         //    //e.GetPosition();
@@ -196,10 +253,10 @@ namespace GygaxVisu.Controls
         //        default:
         //            throw new NotImplementedException();
         //    }
-            
+
 
         //    var txt = image.Filename + "," + x + "," + y + ",";
-            
+
         //    Console.WriteLine(txt);
         //    Clipboard.SetText(txt);
         //}

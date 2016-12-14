@@ -33,7 +33,7 @@ namespace PclWrapper {
 	public:
 		array<Points>^ LoadPointcloud(String^ Name);
 		//void LoadPointcloud(String^ Name, array<Points>^ PointList);
-		void SavePointcloud(char* Name, array<Points>^ cloud);
+		void SavePointcloud(String^ Name, array<Points>^ cloud);
 
 		/// Userdefined processing methods
 		array<Points>^ Process1(array<Points>^ cloud);

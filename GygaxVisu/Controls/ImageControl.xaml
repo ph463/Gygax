@@ -8,8 +8,32 @@
              mc:Ignorable="d"
              >
     <Grid>
-        <Border x:Name="RecordingFrame" BorderThickness="0" BorderBrush="Red">
-        <Image Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" x:Name="RecordingFrame" BorderThickness="0" BorderBrush="Red">
+            <Image x:Name="Image"  Source="{Binding Path=ImageSource, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Stretch="Uniform"/>
         </Border>
+        <Label Grid.Row="0"  HorizontalContentAlignment="Stretch" x:Name="Label" Content="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Visibility="Collapsed"/>
+        <StackPanel HorizontalAlignment="Right" Grid.Row="1" Orientation="Horizontal">
+            <Button x:Name="RecordingButton" Visibility="Collapsed" Click="RecordingButton_OnClick">
+                <Ellipse
+                    Fill="Red"
+                    Height="10"
+                    Width="10"
+                    StrokeThickness="5"
+                    Stroke="Red"/>
+            </Button>
+            <Button x:Name="StopRecordingButton" Visibility="Collapsed" Click="StopRecordingButton_OnClick">
+                <Rectangle
+                    Fill="Black"
+		            Stroke="Black"
+                    StrokeThickness="5"
+		            Width="10"
+                    Height="10"/>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

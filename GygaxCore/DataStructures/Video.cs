@@ -17,6 +17,7 @@ namespace GygaxCore.DataStructures
         public Video(string filename)
         {
             Location = filename;
+            Name = Path.GetFileNameWithoutExtension(filename);
             _capture = new Capture(filename);
             _framesPerSecond = _capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps);
 
@@ -27,6 +28,7 @@ namespace GygaxCore.DataStructures
 
         public override void Close()
         {
+            base.Close();
             _stop = true;
         }
 

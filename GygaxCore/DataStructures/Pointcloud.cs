@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Media;
 using GygaxCore.Interfaces;
@@ -17,6 +18,8 @@ namespace GygaxCore.DataStructures
         public event PropertyChangedEventHandler PropertyChanged;
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public event Streamable.ClosingEvent OnClosing;
 
         public string Location { get; protected set; }
 
@@ -43,10 +46,35 @@ namespace GygaxCore.DataStructures
         public void Close()
         {
             _stop = true;
+            OnClosing?.Invoke(this);
         }
 
         public void Save()
         {
+        }
+
+        public void Save(string filename)
+        {
+            PCD wrapper = new PCD();
+
+            var points = (PointGeometry3D) Data;
+            var rawPoints = new Points[points.Positions.Count];
+
+            var i = 0;
+
+            foreach (var point in points.Positions)
+            {
+                rawPoints[i].x = point.X;
+                rawPoints[i].y = -point.Z;
+                rawPoints[i].z = point.Y;
+                rawPoints[i].r = (byte)(points.Colors[i].Red * 255);
+                rawPoints[i].g = (byte)(points.Colors[i].Green * 255);
+                rawPoints[i].b = (byte)(points.Colors[i].Blue * 255);
+                rawPoints[i].a = 255;
+                i++;
+            }
+
+            wrapper.SavePointcloud(filename, rawPoints);
         }
 
         public Pointcloud()

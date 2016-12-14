@@ -2,12 +2,20 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Forms;
+using GygaxCore.DataStructures;
+using GygaxCore.Ifc;
 using GygaxCore.Interfaces;
+using GygaxCore.Processors;
 using GygaxVisu.Helpers;
+using GygaxVisu.Visualizer;
 using HelixToolkit.Wpf.SharpDX;
 using SharpDX;
+using Application = System.Windows.Application;
+using Binding = System.Windows.Data.Binding;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using MenuItem = System.Windows.Controls.MenuItem;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace GygaxVisu.Controls
 {
@@ -55,10 +63,10 @@ namespace GygaxVisu.Controls
         private void InitializeContextMenu()
         {
             ContextMenu = new ContextMenu();
-            
+
             var hideItem = new MenuItem()
             {
-                Header = "Hide"
+                Header = "Minimise"
             };
 
             hideItem.Click += delegate (object sender, RoutedEventArgs args)
@@ -66,15 +74,112 @@ namespace GygaxVisu.Controls
                 _controlHidden = !_controlHidden;
 
                 if (_controlHidden)
-                    Height = 10;
+                {
+                    Viewport.Visibility = Visibility.Collapsed;
+                    Label.Visibility = Visibility.Visible;
+                }
                 else
                 {
-                    Height = Double.NaN; // Auto height
+                    Viewport.Visibility = Visibility.Visible;
+                    Label.Visibility = Visibility.Collapsed;
                 }
                 hideItem.IsChecked = _controlHidden;
             };
 
             ContextMenu.Items.Add(hideItem);
+
+            var RecordItem = new MenuItem
+            {
+                Header = "Save"
+            };
+
+            RecordItem.Click += delegate (object sender, RoutedEventArgs args)
+            {
+                Save((IStreamable)DataContext);
+            };
+
+            ContextMenu.Items.Add(RecordItem);
+
+            var InfoItem = new MenuItem
+            {
+                Header = "Info"
+            };
+
+            ContextMenu.Opened += delegate (object sender, RoutedEventArgs args)
+            {
+                InfoItem.Items.Clear();
+
+                try
+                {
+                    InfoItem.Items.Add(new MenuItem
+                    {
+                        Header = "Name: " + ((IStreamable)DataContext).Name
+                    });
+
+                    InfoItem.Items.Add(new MenuItem
+                    {
+                        Header = "Location: " + ((IStreamable)DataContext).Location
+                    });
+                }
+                catch (Exception) { }
+
+            };
+
+            ContextMenu.Items.Add(InfoItem);
+
+            var CloseItem = new MenuItem
+            {
+                Header = "Close"
+            };
+
+            CloseItem.Click += delegate (object sender, RoutedEventArgs args)
+            {
+                ((IStreamable)DataContext).Close();
+            };
+
+            ContextMenu.Items.Add(CloseItem);
+        }
+
+        private void Save(IStreamable sender)
+        {
+            if (sender is Pointcloud)
+            {
+                var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog.FileName = "*";
+                saveFileDialog.DefaultExt = "pcd";
+                saveFileDialog.ValidateNames = true;
+
+                saveFileDialog.Filter = "Pointcloud File (.pcd)|*.pcd";
+
+                DialogResult result = saveFileDialog.ShowDialog();
+
+                if (!(result == DialogResult.OK)) // Test result.
+                {
+                    return;
+                }
+
+                sender.Save(saveFileDialog.FileName);
+            }
+            else if (sender is IfcViewerWrapper)
+            {
+                var saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog.FileName = "*";
+                saveFileDialog.DefaultExt = "obj";
+                saveFileDialog.ValidateNames = true;
+
+                saveFileDialog.Filter = "Wavefront Obj File (.obj)|*.obj";
+
+                DialogResult result = saveFileDialog.ShowDialog();
+
+                if (!(result == DialogResult.OK)) // Test result.
+                {
+                    return;
+                }
+                
+                var objExporter = new WavefrontObjWriter();
+                objExporter.Export(IfcVisualizer.GetItems((IfcViewerWrapper)sender.Data,false),saveFileDialog.FileName,"",false);
+                
+            }
         }
 
         public void InitViewport()

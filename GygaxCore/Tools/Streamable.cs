@@ -23,25 +23,24 @@ namespace GygaxCore.DataStructures
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public string Location { get; protected set; }
+        public string Location { get; set; }
 
-        public string Name { get; protected set; }
+        public string Name { get; set; }
 
         private object _data;
+
         public object Data
         {
-            get
-            {
-                return _data;
-            }
+            get { return _data; }
             set
             {
                 _data = value;
                 OnPropertyChanged("Data");
             }
         }
-        
+
         private ImageSource _imageSource;
+
         public ImageSource ImageSource
         {
             get { return _imageSource; }
@@ -53,6 +52,7 @@ namespace GygaxCore.DataStructures
         }
 
         private IImage _cvSource;
+
         public IImage CvSource
         {
             get { return _cvSource; }
@@ -60,7 +60,7 @@ namespace GygaxCore.DataStructures
             {
                 _cvSource = value;
                 OnPropertyChanged("CvSource");
-                if(_cvSource != null)
+                if (_cvSource != null)
                     ImageSource = ToBitmapSource(_cvSource);
             }
         }
@@ -73,7 +73,7 @@ namespace GygaxCore.DataStructures
                 handler(this, new PropertyChangedEventArgs(name));
             }
         }
-        
+
         /// <summary>
         /// Delete a GDI object
         /// </summary>
@@ -93,12 +93,13 @@ namespace GygaxCore.DataStructures
         {
             ImageScale = 1000.0/image.Bitmap.Width;
 
-            var size = new Size((int)Math.Ceiling(image.Bitmap.Width * ImageScale), (int)Math.Ceiling(image.Bitmap.Height * ImageScale));
+            var size = new Size((int) Math.Ceiling(image.Bitmap.Width*ImageScale),
+                (int) Math.Ceiling(image.Bitmap.Height*ImageScale));
 
             Image<Bgr, Byte> dst = new Image<Bgr, byte>(size);
 
-            CvInvoke.Resize(image,dst,size, ImageScale, ImageScale, Inter.Linear);
-            
+            CvInvoke.Resize(image, dst, size, ImageScale, ImageScale, Inter.Linear);
+
             using (System.Drawing.Bitmap source = dst.Bitmap)
             {
                 IntPtr ptr = source.GetHbitmap(); //obtain the Hbitmap
@@ -117,9 +118,27 @@ namespace GygaxCore.DataStructures
             }
         }
 
+        public delegate void ClosingEvent(IStreamable item);
+        public event ClosingEvent OnClosing;
+
         public virtual void Close()
         {
+            OnClosing?.Invoke(this);
         }
+
+        public virtual void Save(string filename)
+        {
+            try
+            {
+                CvSource.Save(filename);
+            }
+            catch (Exception e)
+            {
+                LogManager.GetCurrentClassLogger().Error(e, "Can not write file "+filename);
+            }
+            
+        }
+
 
         public virtual void Save()
         {

@@ -24,9 +24,8 @@ namespace GygaxCore.DataStructures
         public Image(string filename)
         {
             Location = filename;
+            Name = Path.GetFileNameWithoutExtension(filename);
             File = new Uri(Location);
         }
-
-        public override void Close() { }
     }
 }

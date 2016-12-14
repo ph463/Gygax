@@ -33,9 +33,12 @@ array<PclWrapper::Points>^ PclWrapper::PCD::LoadPointcloud(String^ Name)
 	return convertPointcloudToPoints(cloud);
 }
 
-void PclWrapper::PCD::SavePointcloud(char* Name, array<Points>^ cloud)
+void PclWrapper::PCD::SavePointcloud(String^ Name, array<Points>^ cloud)
 {
-	pcl::io::savePCDFileASCII(Name, *convertPointsToPointcloud(cloud));
+	IntPtr ptr = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(Name);
+	char* str = static_cast<char*>(ptr.ToPointer());
+
+	pcl::io::savePCDFileBinary(str, *convertPointsToPointcloud(cloud));
 }
 
 array<PclWrapper::Points>^ PclWrapper::PCD::convertPointcloudToPoints(pcl::PointCloud<pcl::PointXYZRGB>::Ptr p)

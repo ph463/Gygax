@@ -25,6 +25,7 @@ namespace GygaxCore.DataStructures
             var thread = new Thread(WorkThreadFunction);
 
             Location = filename;
+            Name = Path.GetFileNameWithoutExtension(filename);
 
             thread.Name = Location;
             thread.Start();
@@ -77,6 +78,7 @@ namespace GygaxCore.DataStructures
         public override void Close()
         {
             _stop = true;
+            base.Close();
         }
     }
 }

@@ -75,6 +75,9 @@ namespace GygaxVisu
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
+            if (_viewModel.Items.Count == 0)
+                return;
+
             foreach (var item in _viewModel.Items)
             {
                 ((IStreamable)item).Close();

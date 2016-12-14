@@ -15,6 +15,7 @@ using IImage = Emgu.CV.IImage;
 using Point = System.Drawing.Point;
 using System.Linq;
 using System.Windows.Media.Imaging;
+using GygaxCore.DataStructures;
 
 namespace GygaxCore.Ifc
 {
@@ -294,6 +295,8 @@ namespace GygaxCore.Ifc
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public string Location { get; private set; }
+
+        public event Streamable.ClosingEvent OnClosing;
 
         public string Name { get; private set; }
 
@@ -1234,9 +1237,6 @@ namespace GygaxCore.Ifc
         public void OnMouseUp(MouseEventArgs e)
         {
             _currentMoveType = MOVE_TYPE.NONE;
-
-
-
         }
 
 
@@ -1409,10 +1409,16 @@ namespace GygaxCore.Ifc
         public IImage CvSource { get; set; }
         public void Close()
         {
+            OnClosing?.Invoke(this);
         }
 
         public void Save()
         {
+        }
+
+        public void Save(string filename)
+        {
+
         }
     }
 }

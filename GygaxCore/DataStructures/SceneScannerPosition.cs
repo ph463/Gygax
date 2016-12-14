@@ -62,7 +62,5 @@ namespace GygaxCore.DataStructures
 
             return retList;
         }
-
-        public override void Close() { }
     }
 }

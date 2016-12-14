@@ -12,8 +12,10 @@ using GygaxCore.Ifc;
 using GygaxCore.Interfaces;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
+using NLog;
 using SharpDX;
 using GeometryModel3D = HelixToolkit.Wpf.SharpDX.GeometryModel3D;
+using MeshGeometry3D = System.Windows.Media.Media3D.MeshGeometry3D;
 
 namespace GygaxVisu.Visualizer
 {
@@ -57,6 +59,72 @@ namespace GygaxVisu.Visualizer
             if (t == typeof(CoordinateSystem))
             {
                 return CoordinateSystemVisualizer.GetModels((CoordinateSystem)data);
+            }
+
+            if (t == typeof(Model3DGroup))
+            {
+                var r = new List<MeshGeometryModel3D>();
+
+                var d = (Model3DGroup) data;
+
+                foreach (var dChild in d.Children)
+                {
+                    var l = new MeshGeometryModel3D();
+                    var gm = (System.Windows.Media.Media3D.GeometryModel3D) dChild;
+                    var m = gm.Geometry as MeshGeometry3D;
+                    
+                    var geo = new HelixToolkit.Wpf.SharpDX.MeshGeometry3D()
+                    {
+                        Positions = new Vector3Collection(),
+                        Normals = new Vector3Collection(),
+                        Indices = new IntCollection(),
+                        TextureCoordinates = new Vector2Collection()
+                    };
+
+                    foreach (var mPosition in m.Positions)
+                    {
+                        geo.Positions.Add(new Vector3((float)mPosition.X, (float)mPosition.Y, (float)mPosition.Z));
+                    }
+
+                    foreach (var mTriangles in m.TriangleIndices)
+                    {
+                        geo.Indices.Add(mTriangles);
+                    }
+
+                    foreach (var mTriangles in m.TextureCoordinates)
+                    {
+                        geo.TextureCoordinates.Add(new Vector2((float)mTriangles.X, (float)mTriangles.Y));
+                    }
+
+                    foreach (var mNormals in m.Normals)
+                    {
+                        geo.Normals.Add(new Vector3((float)mNormals.X, (float)mNormals.Y, (float)mNormals.Z));
+                    }
+
+                    l.Geometry = geo;
+
+                    var diffuse =
+                        (DiffuseMaterial)((MaterialGroup) gm.Material).Children.First(ob => ob is DiffuseMaterial);
+                    var specular =
+                        (SpecularMaterial)((MaterialGroup)gm.Material).Children.First(ob => ob is SpecularMaterial);
+
+
+                    l.Material = new PhongMaterial()
+                    {
+                        AmbientColor = new Color4(diffuse.AmbientColor.R, diffuse.AmbientColor.G, diffuse.AmbientColor.B, diffuse.AmbientColor.A),
+                        DiffuseColor = new Color4(diffuse.Color.R, diffuse.Color.G, diffuse.Color.B, diffuse.Color.A),
+                        SpecularColor = new Color4(specular.Color.R, specular.Color.G, specular.Color.B, specular.Color.A)
+                    };
+
+                    if (diffuse.Color.R == 0xFF && diffuse.Color.G == 0xFF && diffuse.Color.B == 0xFF)
+                    {
+                        l.Material = PhongMaterials.LightGray;
+                    }
+
+                    r.Add(l);
+                }
+
+                return r.ToArray();
             }
 
             return null;

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
+using GygaxCore.DataStructures;
 using GygaxCore.DataStructures.DataStructures.Interfaces;
 using GygaxVisu.Controls;
 
@@ -35,6 +37,26 @@ namespace GygaxVisu
         public ViewModel()
         {
             Items = new ObservableCollection<IStreamable>();
+            Items.CollectionChanged += ItemsOnCollectionChanged;
+        }
+        
+
+        private void ItemsOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
+        {
+            var list = (ObservableCollection<IStreamable>)sender;
+
+            if (notifyCollectionChangedEventArgs.Action != NotifyCollectionChangedAction.Add)
+                return;
+
+            var element = list.First(q => q.Equals(notifyCollectionChangedEventArgs.NewItems[0]));
+
+            element.OnClosing += CloseListItem;
+        }
+
+        public void CloseListItem(IStreamable item)
+        {
+            item.OnClosing -= CloseListItem;
+            Items.Remove(item);
         }
 
         public ObservableCollection<IStreamable> Items

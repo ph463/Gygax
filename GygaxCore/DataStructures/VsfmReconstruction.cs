@@ -41,7 +41,5 @@ namespace GygaxCore.DataStructures
 
             return a.ToArray();
         }
-
-        public override void Close() { }
     }
 }

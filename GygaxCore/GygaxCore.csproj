@@ -168,6 +168,7 @@
     <Compile Include="Processors\MyMethod.cs" />
     <Compile Include="Processors\Threshold.cs" />
     <Compile Include="Processors\EdgeDetector.cs" />
+    <Compile Include="Processors\WavefrontObjWriter.cs" />
     <Compile Include="Tools\CoordinateSystem.cs" />
     <Compile Include="DataStructures\PotreeNode.cs" />
     <Compile Include="DataStructures\SceneScannerPosition.cs" />

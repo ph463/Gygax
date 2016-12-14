@@ -21,5 +21,6 @@
             Visibility="Hidden"
             >
         </hx:Viewport3DX>
+        <Label Grid.Row="0"  HorizontalContentAlignment="Stretch" x:Name="Label" Content="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Visibility="Collapsed"/>
     </Grid>
 </UserControl>

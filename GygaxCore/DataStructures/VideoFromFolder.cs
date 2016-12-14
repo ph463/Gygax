@@ -38,6 +38,7 @@ namespace GygaxCore.DataStructures
         public override void Close()
         {
             _stop = true;
+            base.Close();
         }
 
         public VideoFromFolder()

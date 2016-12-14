@@ -45,6 +45,7 @@ namespace GygaxCore.Devices
             _thread.Name = "NetworkCamera " + Ip;
 
             Location = _thread.Name;
+            Name = _thread.Name;
 
             _thread.Start();
         }
@@ -148,6 +149,7 @@ namespace GygaxCore.Devices
 
         public override void Close()
         {
+            base.Close();
             _stop = true;
         }
     }
