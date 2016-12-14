@@ -68,10 +68,9 @@ namespace GygaxVisu
         {
             ClearWorkspace.Invoke(this, EventArgs.Empty);
 
-
-            foreach (var item in Items)
+            while (Items.Count > 0)
             {
-                item.Close();
+                Items[0].Close();
             }
 
             Items.Clear();

@@ -66,11 +66,8 @@ namespace GygaxVisu
 
         private void StreamListOnSelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
         {
-            //Stage.MainGrid.Children.Add(((System.Windows.Controls.ListBox)sender).SelectedItems[0]);
-
             if(((System.Windows.Controls.ListBox)sender).SelectedItems.Count > 0)
                 SelectedItemStage.MainGrid.DataContext = ((System.Windows.Controls.ListBox) sender).SelectedItems[0];
-
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
@@ -78,10 +75,17 @@ namespace GygaxVisu
             if (_viewModel.Items.Count == 0)
                 return;
 
-            foreach (var item in _viewModel.Items)
+            try
             {
-                ((IStreamable)item).Close();
+                foreach (var item in _viewModel.Items)
+                {
+                    ((IStreamable) item).Close();
+                }
             }
+            catch (Exception)
+            {
+            }
+
         }
 
         private void Control_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)

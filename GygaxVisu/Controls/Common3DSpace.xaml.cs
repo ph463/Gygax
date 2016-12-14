@@ -126,7 +126,12 @@ namespace GygaxVisu.Controls
 
                 var elements = Visualizer.Visualizer.GetModels(streamable.Data);
 
-                DatastreamTree.Items.Add(Visualizer.Visualizer.GetTreeItems(streamable, elements));
+                var adds = Visualizer.Visualizer.GetTreeItems(streamable, elements);
+
+                if (adds == null)
+                    continue;
+
+                DatastreamTree.Items.Add(adds);
 
                 if (elements == null) continue;
 

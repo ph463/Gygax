@@ -40,7 +40,21 @@ namespace GygaxVisu.Controls
             InitializeComponent();
             SetBinding(MyDataContextProperty, new Binding());
 
+            SizeChanged += OnSizeChanged;
+
             InitializeContextMenu();
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs sizeChangedEventArgs)
+        {
+            if (((ImageControl)sender).ActualWidth > 300)
+            {
+                ContextMenu = null;
+            }
+            else
+            {
+                InitializeContextMenu();
+            }
         }
 
         private void InitializeContextMenu()
