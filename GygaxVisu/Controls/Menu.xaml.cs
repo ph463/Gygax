@@ -11,10 +11,12 @@ using GygaxCore.Devices;
 using GygaxCore.Ifc;
 using GygaxCore.Processors;
 using GygaxVisu.Dialogs;
+using HelixToolkit.Wpf.SharpDX;
 using Image = GygaxCore.DataStructures.Image;
 using MenuItem = System.Windows.Controls.MenuItem;
 using UserControl = System.Windows.Controls.UserControl;
 using NLog;
+using SharpDX;
 
 namespace GygaxVisu.Controls
 {

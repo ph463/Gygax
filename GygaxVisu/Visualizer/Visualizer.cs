@@ -28,9 +28,19 @@ namespace GygaxVisu.Visualizer
 
             var t = data.GetType();
 
+            if (t == typeof(List<GeometryModel3D>))
+            {
+                return ((List<GeometryModel3D>)data).ToArray();
+            }
+
             if (t == typeof(NViewMatch))
             {
                 return NViewMatchVisualizer.GetModels((NViewMatch)data);
+            }
+
+            if (t == typeof(NViewMatch[]))
+            {
+                return NViewMatchVisualizer.GetModels((NViewMatch[])data);
             }
 
             if (t == typeof(List<CameraPosition>))
@@ -65,14 +75,14 @@ namespace GygaxVisu.Visualizer
             {
                 var r = new List<MeshGeometryModel3D>();
 
-                var d = (Model3DGroup) data;
+                var d = (Model3DGroup)data;
 
                 foreach (var dChild in d.Children)
                 {
                     var l = new MeshGeometryModel3D();
-                    var gm = (System.Windows.Media.Media3D.GeometryModel3D) dChild;
+                    var gm = (System.Windows.Media.Media3D.GeometryModel3D)dChild;
                     var m = gm.Geometry as MeshGeometry3D;
-                    
+
                     var geo = new HelixToolkit.Wpf.SharpDX.MeshGeometry3D()
                     {
                         Positions = new Vector3Collection(),
@@ -104,7 +114,7 @@ namespace GygaxVisu.Visualizer
                     l.Geometry = geo;
 
                     var diffuse =
-                        (DiffuseMaterial)((MaterialGroup) gm.Material).Children.First(ob => ob is DiffuseMaterial);
+                        (DiffuseMaterial)((MaterialGroup)gm.Material).Children.First(ob => ob is DiffuseMaterial);
                     var specular =
                         (SpecularMaterial)((MaterialGroup)gm.Material).Children.First(ob => ob is SpecularMaterial);
 
@@ -222,7 +232,6 @@ namespace GygaxVisu.Visualizer
             List<GeometryModel3D> models = new List<GeometryModel3D>();
 
             var model = new MeshGeometryModel3D();
-            var pb = new PrimitiveBuilder();
 
             var length = (camera.FocalLength / Math.Sqrt(Math.Pow(camera.Height, 2) + Math.Pow(camera.Width, 2)));
 
@@ -242,7 +251,7 @@ namespace GygaxVisu.Visualizer
                              length * (CameraPosition.GetCornerPointToAxis(camera, camera.Orientation,
                                  CameraPosition.Direction.BottomLeft));
 
-            model.Geometry = pb.GetRect(p1.ToVector3(), p2.ToVector3(), p3.ToVector3(), p4.ToVector3());
+            model.Geometry = PrimitiveBuilder.GetRect(p1.ToVector3(), p2.ToVector3(), p3.ToVector3(), p4.ToVector3());
 
             //model.Material = new PhongMaterial
             //{

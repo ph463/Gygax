@@ -134,9 +134,47 @@ namespace GygaxVisu.Controls
                 DatastreamTree.Items.Add(adds);
 
                 if (elements == null) continue;
+                if (elements == null) continue;
 
-                foreach (var model in elements)
+                foreach (var m in elements)
                 {
+                    var model = m;
+
+                    if (model.Parent != null)
+                    {
+                        if (model is MeshGeometryModel3D)
+                        {
+                            model = new MeshGeometryModel3D()
+                            {
+                                Geometry = ((MeshGeometryModel3D)m).Geometry,
+                                Material = ((MeshGeometryModel3D)m).Material,
+                                Transform = ((MeshGeometryModel3D)m).Transform,
+                            };
+                        }
+                        else if (model is PointGeometryModel3D)
+                        {
+                            model = new PointGeometryModel3D()
+                            {
+                                Geometry = ((PointGeometryModel3D)m).Geometry,
+                                Transform = ((PointGeometryModel3D)m).Transform,
+                                Color = ((PointGeometryModel3D)m).Color
+                            };
+                        }
+                        else if (model is LineGeometryModel3D)
+                        {
+                            model = new LineGeometryModel3D()
+                            {
+                                Geometry = ((LineGeometryModel3D)m).Geometry,
+                                Transform = ((LineGeometryModel3D)m).Transform,
+                                Color = ((LineGeometryModel3D)m).Color
+                            };
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
                     if (Viewport.RenderHost.RenderTechnique != null)
                     {
                         model.Attach(Viewport.RenderHost);
