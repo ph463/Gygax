@@ -26,6 +26,10 @@ namespace GygaxVisu.Controls
     {
         private IStreamable _streamableObject;
 
+        private bool _controlHidden = false;
+
+        private bool _viewportInitialized = false;
+
         public IStreamable StreamableObject
         {
             get
@@ -47,18 +51,33 @@ namespace GygaxVisu.Controls
             Viewport.RenderTechniquesManager = new DefaultRenderTechniquesManager();
             Viewport.RenderTechnique = Viewport.RenderTechniquesManager.RenderTechniques[DefaultRenderTechniqueNames.Blinn];
             Viewport.EffectsManager = new DefaultEffectsManager(Viewport.RenderTechniquesManager);
-
-            InitViewport();
-
-
+            
             SetBinding(DataContextProperty, new Binding());
             
             SizeChanged += OnSizeChanged;
 
             InitializeContextMenu();
+
+            CheckIfModelHasArrived();
         }
 
-        private bool _controlHidden = false;
+        public void CheckIfModelHasArrived()
+        {
+            if (_streamableObject != null)
+            {
+                ViewModel();
+            }
+            else
+            {
+                System.Threading.Timer timer = null;
+                timer = new System.Threading.Timer((obj) =>
+                {
+                    CheckIfModelHasArrived();
+                    timer.Dispose();
+                },
+                null, 1000, System.Threading.Timeout.Infinite);
+            }
+        }
 
         private void InitializeContextMenu()
         {
@@ -184,6 +203,11 @@ namespace GygaxVisu.Controls
 
         public void InitViewport()
         {
+            if (_viewportInitialized)
+                return;
+
+            _viewportInitialized = true;
+
             Viewport.Items.Clear();
 
             var model = new AmbientLight3D {Color = new Color4(1, 1, 1, 1)};
@@ -223,6 +247,69 @@ namespace GygaxVisu.Controls
             }
         }
 
+        private void ViewModel()
+        {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                InitViewport();
+
+                var vis = Visualizer.Visualizer.GetModels(_streamableObject.Data);
+
+                if (vis == null)
+                    return;
+
+                foreach (var m in vis)
+                {
+                    var model = m;
+
+                    if (model.Parent != null)
+                    {
+                        if (model is MeshGeometryModel3D)
+                        {
+                            model = new MeshGeometryModel3D()
+                            {
+                                Geometry = ((MeshGeometryModel3D)m).Geometry,
+                                Material = ((MeshGeometryModel3D)m).Material,
+                                Transform = ((MeshGeometryModel3D)m).Transform
+                            };
+                        }
+                        else if (model is PointGeometryModel3D)
+                        {
+                            model = new PointGeometryModel3D()
+                            {
+                                Geometry = ((PointGeometryModel3D)m).Geometry,
+                                Transform = ((PointGeometryModel3D)m).Transform,
+                                Color = ((PointGeometryModel3D)m).Color
+                            };
+                        }
+                        else if (model is LineGeometryModel3D)
+                        {
+                            model = new LineGeometryModel3D()
+                            {
+                                Geometry = ((LineGeometryModel3D)m).Geometry,
+                                Transform = ((LineGeometryModel3D)m).Transform,
+                                Color = ((LineGeometryModel3D)m).Color
+                            };
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (Viewport.RenderHost.RenderTechnique != null)
+                        model.Attach(Viewport.RenderHost);
+
+                    Viewport.Items.Add(model);
+                }
+
+                ViewportHelper.ZoomExtents(Viewport);
+
+                Viewport.Visibility = Visibility.Visible;
+                LoadingAnimation.Visibility = Visibility.Hidden;
+            });
+        }
+
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
         {
             switch (propertyChangedEventArgs.PropertyName)
@@ -233,67 +320,7 @@ namespace GygaxVisu.Controls
 
                 case "Data":
                 case "DataContext":
-                    Application.Current.Dispatcher.Invoke(delegate
-                    {
-                        //var vis = (Visualizer.Visualizer)_streamableObject.Data;
-
-                        InitViewport();
-
-                        var vis = Visualizer.Visualizer.GetModels(_streamableObject.Data);
-
-                        if (vis == null)
-                            return;
-
-                        foreach (var m in vis)
-                        {
-                            var model = m;
-
-                            if (model.Parent != null)
-                            {
-                                if (model is MeshGeometryModel3D)
-                                {
-                                    model = new MeshGeometryModel3D()
-                                    {
-                                        Geometry = ((MeshGeometryModel3D)m).Geometry,
-                                        Material = ((MeshGeometryModel3D)m).Material,
-                                        Transform = ((MeshGeometryModel3D)m).Transform
-                                    };
-                                }
-                                else if (model is PointGeometryModel3D)
-                                {
-                                    model = new PointGeometryModel3D()
-                                    {
-                                        Geometry = ((PointGeometryModel3D)m).Geometry,
-                                        Transform = ((PointGeometryModel3D)m).Transform,
-                                        Color = ((PointGeometryModel3D)m).Color
-                                    };
-                                }
-                                else if (model is LineGeometryModel3D)
-                                {
-                                    model = new LineGeometryModel3D()
-                                    {
-                                        Geometry = ((LineGeometryModel3D)m).Geometry,
-                                        Transform = ((LineGeometryModel3D)m).Transform,
-                                        Color = ((LineGeometryModel3D)m).Color
-                                    };
-                                }
-                                else
-                                {
-                                    continue;
-                                }
-                            }
-
-                            if (Viewport.RenderHost.RenderTechnique != null)
-                                model.Attach(Viewport.RenderHost);
-
-                            Viewport.Items.Add(model);
-                        }
-
-                        ViewportHelper.ZoomExtents(Viewport);
-
-                        Viewport.Visibility = Visibility.Visible;
-                        LoadingAnimation.Visibility = Visibility.Hidden;
-                    });
+                    ViewModel();
                     break;
             }
 
