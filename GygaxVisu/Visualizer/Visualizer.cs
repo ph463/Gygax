@@ -163,6 +163,10 @@ namespace GygaxVisu.Visualizer
             {
                 return IfcVisualizer.GetTreeItems((IfcViewerWrapper)data, models);
             }
+            else if (t == typeof(Pointcloud))
+            {
+                return PointcloudVisualizer.GetTreeItems((Pointcloud)data, models);
+            }
             else
             {
                 return GetStandardTreeItems(data, models);
