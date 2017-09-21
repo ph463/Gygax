@@ -26,9 +26,7 @@ namespace GygaxVisu.Controls
     {
         private IStreamable _streamableObject;
 
-        private bool _controlHidden = false;
-
-        private bool _viewportInitialized = false;
+        private bool _controlHidden;
 
         public IStreamable StreamableObject
         {
@@ -203,12 +201,9 @@ namespace GygaxVisu.Controls
 
         public void InitViewport()
         {
-            if (_viewportInitialized)
-                return;
-
-            _viewportInitialized = true;
-
             Viewport.Items.Clear();
+            Viewport.Reset();
+            Viewport.ReAttach();
 
             var model = new AmbientLight3D {Color = new Color4(1, 1, 1, 1)};
 
